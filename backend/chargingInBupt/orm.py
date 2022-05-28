@@ -27,7 +27,7 @@ class Charger(Base):
 
     # 表的结构:
     id = Column(String(20), primary_key=True)
-    charger_status = Column(Enum('Online', 'Offline', 'Error'))
+    charger_status = Column(Enum('MAINTAINING', 'SHUTDOWN', 'UNAVAILABLE'))
 
 
 class ChargeRecord(Base):

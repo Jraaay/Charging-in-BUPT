@@ -1,4 +1,3 @@
-from email import header
 import jwt
 from functools import wraps
 
@@ -58,3 +57,11 @@ def authorized_admin():
                 return json({"status": "not_authorized"}, 403)
         return decorated_function
     return decorator
+
+def get_username(request):
+    token = request.headers.get('Authorization').split(' ')[1]
+    try:
+        payload = jwt.decode(token, CONFIG['JWT']['secret'], algorithms=['HS256'])
+        return payload['name']
+    except jwt.InvalidTokenError:
+        return ""

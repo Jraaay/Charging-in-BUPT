@@ -1,0 +1,588 @@
+openapi: 3.0.0
+servers:
+  - url: "https://example.com/api"
+    description: example base url
+info:
+  description: 智能充电桩调度计费系统开放API文档
+  version: 1.1.0
+  title: 智能充电桩调度计费系统
+  contact:
+    email: kino@bupt.edu.cn
+    name: kino
+tags:
+  - name: user
+    description: 用户客户端相关API
+  - name: admin
+    description: 管理员客户端相关API
+paths:
+  /user/login:
+    post:
+      tags:
+        - user
+      summary: 登陆
+      description: "用户登录，返回JWT"
+      operationId: login
+      requestBody:
+        description: 用户名密码
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: 用户名
+                  maxLength: 20
+                  example: jinuo
+                password:
+                  type: string
+                  description: 密码
+                  maxLength: 32
+                  example: i-hate-bupt
+      responses:
+        "200":
+          description: 通用响应
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 状态码（成功0，失败-1）
+                    example: 0
+                  message:
+                    type: string
+                    description: 响应消息
+                    example: success
+                  data:
+                    type: object
+                    description: 响应数据体
+                    properties:
+                      token:
+                        type: string
+                        description: jwt token
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6ImppbnVvIiwiaWF0IjoxNTE2MjM5MDIyfQ.WhOxJUL0ZfPW6zrLNdkbQvoE8JObEB_5kr9DkgEVDeE
+  /user/register:
+    post:
+      tags:
+        - user
+      summary: 注册
+      description: "用户注册"
+      operationId: register
+      requestBody:
+        description: 用户名密码
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: 用户名
+                  maxLength: 20
+                  minLength: 4
+                  example: jinuo
+                password:
+                  type: string
+                  description: 密码
+                  maxLength: 32
+                  minLength: 8
+                  example: i-hate-bupt
+                re_password:
+                  type: string
+                  description: 重复密码
+                  maxLength: 32
+                  minLength: 8
+                  example: i-hate-bupt
+      responses:
+        "200":
+          description: 通用响应
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 状态码（成功0，失败-1）
+                    example: 0
+                  message:
+                    type: string
+                    description: 响应消息
+                    example: success
+  /user/submit_charging_request:
+    post:
+      tags:
+        - user
+      summary: 提交充电请求
+      description: "向服务端提交充电请求"
+      operationId: submit_charging_request
+      requestBody:
+        description: 充电请求的详细信息
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - charge_mode
+                - require_amount
+                - battery_size
+              properties:
+                charge_mode:
+                  type: string
+                  description: 充电模式
+                  maxLength: 1
+                  minLength: 1
+                  example: F
+                require_amount:
+                  type: number
+                  description: 请求充电量（单位：Ah）
+                  multipleOf: 0.01
+                  example: 47.74
+                battery_size:
+                  type: number
+                  description: 电池容量（单位：Ah）
+                  multipleOf: 0.01
+                  example: 60.00
+      responses:
+        "200":
+          description: 通用响应
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 状态码（成功0，失败-1）
+                    example: 0
+                  message:
+                    type: string
+                    description: 响应消息
+                    example: success
+                  data:
+                    type: object
+                    description: 响应数据体
+                    properties:
+                      charge_id:
+                        type: string
+                        description: 本车排队号码，唯一标识
+                        minLength: 2
+                        example: F1
+  /user/edit_charging_request:
+    post:
+      tags:
+        - user
+      summary: 修改充电请求
+      description: "修改已提交的充电请求，允许变更除电池容量外的信息"
+      operationId: edit_charging_request
+      requestBody:
+        description: 充电请求的可修改信息
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - charge_mode
+                - require_amount
+              properties:
+                charge_mode:
+                  type: string
+                  description: 充电模式
+                  maxLength: 1
+                  minLength: 1
+                  example: F
+                require_amount:
+                  type: number
+                  description: 请求充电量（单位：Ah）
+                  multipleOf: 0.01
+                  example: 47.74
+      responses:
+        "200":
+          description: 通用响应
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 状态码（成功0，失败-1）
+                    example: 0
+                  message:
+                    type: string
+                    description: 响应消息
+                    example: success
+  /user/end_charging_request:
+    get:
+      tags:
+        - user
+      summary: 取消充电请求
+      description: "请求取消排队或结束充电，并生成详单"
+      operationId: end_charging_request
+      responses:
+        "200":
+          description: 通用响应
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 状态码（成功0，失败-1）
+                    example: 0
+                  message:
+                    type: string
+                    description: 响应消息
+                    example: success
+  /user/query_order_detail:
+    get:
+      tags:
+        - user
+      summary: 查看充电详单
+      description: "查询指定充电请求的详单"
+      operationId: query_order_detail
+      responses:
+        "200":
+          description: 通用响应
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 状态码（成功0，失败-1）
+                    example: 0
+                  message:
+                    type: string
+                    description: 响应消息
+                    example: success
+                  data:
+                    type: array
+                    description: 响应数据体
+                    items:
+                      type: object
+                      properties:
+                        order_id:
+                          type: string
+                          description: 排队号码（订单号）
+                          example: 20220101000001
+                        create_time:
+                          type: string
+                          format: date-time
+                          description: 订单创建时间
+                          example: 2022-01-01 12:11:11
+                        charged_amount:
+                          type: number
+                          description: 充电电量（单位：Ah）
+                          multipleOf: 0.01
+                          example: 14.53
+                        charged_time:
+                          type: integer
+                          description: 充电时长（单位：秒）
+                          example: 600
+                        begin_time:
+                          type: string
+                          format: date-time
+                          description: 开始充电时间
+                          example: 2022-01-01 11:11:11
+                        end_time:
+                          type: string
+                          format: date-time
+                          description: 结束充电时间
+                          example: 2022-01-01 12:11:11
+                        charging_cost:
+                          type: number
+                          description: 充电费用（单位：元）
+                          multipleOf: 0.01
+                          example: 8.92
+                        service_cost:
+                          type: number
+                          description: 服务费用（单位：元）
+                          multipleOf: 0.01
+                          example: 1.23
+                        total_cost:
+                          type: number
+                          description: 总费用（单位：元）
+                          multipleOf: 0.01
+                          example: 10.15
+  /user/preview_queue:
+    get:
+      tags:
+        - user
+      summary: 预览排队情况
+      description: "客户端预览目前的排队情况，返回本车排队号码与本充电模式下前车等待数量"
+      operationId: preview_queue
+      responses:
+        "200":
+          description: 通用响应
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 状态码（成功0，失败-1）
+                    example: 0
+                  message:
+                    type: string
+                    description: 响应消息
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      charge_id:
+                        type: string
+                        description: 本车排队号码
+                        example: F7
+                      queue_len:
+                        type: integer
+                        description: 本充电模式下前车等待数量
+                        example: 4
+                      cur_state:
+                        description: 当前充电状态，NOTCHARGING 表示没有充电请求，WAITINGSTAGE1 表示在等候区等待，WAITINGSTAGE2 表示在充电区等待，CHARGING 表示正在充电，CHANGEMODEREQUEUE 表示充电模式更改导致的重新排队（约等于WAITINGSTAGE1），FAULTREQUEUE 表示充电桩故障，需要转移充电桩（约等于WAITINGSTAGE2）
+                        enum:
+                          - NOTCHARGING
+                          - WAITINGSTAGE1
+                          - WAITINGSTAGE2
+                          - CHARGING
+                          - CHANGEMODEREQUEUE
+                          - FAULTREQUEUE
+                        example: NOTCHARGING
+                      place:
+                        type: string
+                        description: 当前用户应该在的地方，如等候区（WAITINGPLACE），充电区（充电桩编号），当不在充电状态时无效
+                        example: WAITINGPLACE
+  /admin/query_report:
+    get:
+      tags:
+        - admin
+      summary: 查看报表
+      description: "查看充电站的数据报表"
+      operationId: query_report
+      responses:
+        "200":
+          description: 通用响应
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 状态码（成功0，失败-1）
+                    example: 0
+                  message:
+                    type: string
+                    description: 响应消息
+                    example: success
+                  data:
+                    type: array
+                    description: 响应数据体
+                    items:
+                      type: object
+                      properties:
+                        day:
+                          type: integer
+                          description: 天
+                          example: 65
+                        week:
+                          type: integer
+                          description: 周
+                          example: 9
+                        month:
+                          type: integer
+                          description: 月
+                          example: 2
+                        pile_id:
+                          type: integer
+                          description: 充电桩编号
+                          example: 37
+                        cumulative_usage_times:
+                          type: integer
+                          description: 累计使用次数
+                          example: 173
+                        cumulative_charging_time:
+                          type: integer
+                          description: 累计充电时长（单位：小时）
+                          example: 205
+                        cumulative_charging_amount:
+                          type: number
+                          multipleOf: 0.01
+                          example: 累计充电量（单位：Ah）
+                        cumulative_charging_earning:
+                          type: number
+                          description: 累计充电费用（单位：元）
+                          multipleOf: 0.01
+                          example: 2312.12
+                        cumulative_service_earning:
+                          type: number
+                          description: 累计服务费用（单位：元）
+                          multipleOf: 0.01
+                          example: 121.08
+                        cumulative_earning:
+                          type: number
+                          description: 累计总费用（单位：元）
+                          multipleOf: 0.01
+                          example: 2433.20
+  /admin/query_all_piles_stat:
+    get:
+      tags:
+        - admin
+      summary: 查看所有充电桩状态
+      description: "查询所有充电桩的统计信息"
+      operationId: query_all_piles_stat
+      responses:
+        "200":
+          description: 通用响应
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 状态码（成功0，失败-1）
+                    example: 0
+                  message:
+                    type: string
+                    description: 响应消息
+                    example: success
+                  data:
+                    type: array
+                    description: 响应数据体
+                    items:
+                      type: object
+                      properties:
+                        pile_id:
+                          type: integer
+                          description: 充电桩编号
+                        status:
+                          type: string
+                          description: 充电桩状态
+                          enum:
+                            - MAINTAINING
+                            - SHUTDOWN
+                            - UNAVAILABLE
+                          example: MAINTAINING
+                        cumulative_usage_times:
+                          type: integer
+                          description: 充电桩累计使用次数
+                          example: 53
+                        cumulative_charging_time:
+                          type: integer
+                          description: 充电桩累计充电时间（单位：小时）
+                          example: 287
+                        cumulative_charging_amount:
+                          type: number
+                          description: 充电桩累计充电电量（单位：Ah）
+                          example: 2191.32
+  /admin/query_queue:
+    get:
+      tags:
+        - admin
+      summary: 查看总体排队情况
+      description: "查询目前所有正在排队的用户"
+      operationId: query_queue
+      responses:
+        "200":
+          description: 通用响应
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 状态码（成功0，失败-1）
+                    example: 0
+                  message:
+                    type: string
+                    description: 响应消息
+                    example: success
+                  data:
+                    type: array
+                    description: 响应数据体
+                    items:
+                      type: object
+                      properties:
+                        pile_id:
+                          type: integer
+                          description: 充电桩编号
+                          example: 172
+                        user_id:
+                          type: integer
+                          description: 用户编号
+                          example: 389
+                        battery_size:
+                          type: number
+                          description: 电池容量（单位：Ah）
+                          multipleOf: 0.01
+                          example: 60.00
+                        require_amount:
+                          type: number
+                          description: 请求充电量（单位：Ah）
+                          multipleOf: 0.01
+                          example: 47.74
+                        waiting_time:
+                          type: integer
+                          description: 已等待时间（单位：秒）
+                          example: 600
+  /admin/update_pile:
+    post:
+      tags:
+        - admin
+      summary: 更新充电桩状态
+      description: "更新充电桩状态"
+      operationId: update_pile
+      requestBody:
+        description: 充电桩状态
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                charger_id:
+                  type: string
+                  description: 充电桩号
+                  example: C01
+                status:
+                  description: 充电桩状态
+                  enum:
+                    - MAINTAINING
+                    - SHUTDOWN
+                    - UNAVAILABLE
+                  example: MAINTAINING
+      responses:
+        "200":
+          description: 通用响应
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 状态码（成功0，失败-1）
+                    example: 0
+                  message:
+                    type: string
+                    description: 响应消息
+                    example: success
