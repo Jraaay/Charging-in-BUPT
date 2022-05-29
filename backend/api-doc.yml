@@ -43,6 +43,10 @@ paths:
                   description: 密码
                   maxLength: 32
                   example: i-hate-bupt
+                is_admin:
+                  type: boolean
+                  description: 是否是管理员
+                  example: true
       responses:
         "200":
           description: 通用响应
@@ -319,6 +323,10 @@ paths:
                           description: 总费用（单位：元）
                           multipleOf: 0.01
                           example: 10.15
+                        charger_id:
+                          type: string
+                          description: 充电桩号
+                          example: C01
   /user/preview_queue:
     get:
       tags:
