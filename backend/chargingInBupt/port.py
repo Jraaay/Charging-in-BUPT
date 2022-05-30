@@ -82,7 +82,12 @@ async def submit_charging_request(request):
     charge_mode = request.json.get('charge_mode')
     require_amount = request.json.get('require_amount')
     battery_size = request.json.get('battery_size')
-    # TODO: 处理，获取 charge_id
+    # TODO(1): 处理，获取 charge_id
+    # 判断是否不在充电状态
+    # 插入对应队列
+    # 生成充电请求，插入数据库
+    # 返回排队id
+    # 如果等待区不为空要调度
     success = None
     error_msg = None
     charge_id = None
@@ -107,7 +112,10 @@ async def edit_charging_request(request):
     user = session.query(User).filter(User.username == get_username(request)).first()
     charge_mode = request.json.get('charge_mode')
     require_amount = request.json.get('require_amount')
-    # TODO: 处理，修改充电请求
+    # TODO(1): 处理，修改充电请求
+    # 判断是否可以修改
+    # 修改后数据写入数据库
+    # 放入队列最后
     success = None
     error_msg = None
     if success:
@@ -125,7 +133,10 @@ async def edit_charging_request(request):
 @authorized()
 async def end_charging_request(request):
     user = session.query(User).filter(User.username == get_username(request)).first()
-    # TODO: 处理，取消充电请求
+    # TODO(2): 处理，取消充电请求
+    # 生成详单
+    # 更新状态
+    # 触发调度
     success = None
     error_msg = None
     if success:
@@ -143,7 +154,8 @@ async def end_charging_request(request):
 @authorized()
 async def query_order_detail(request):
     user = session.query(User).filter(User.username == get_username(request)).first()
-    # TODO: 处理，获取该用户所有充电详单
+    # TODO(2): 处理，获取该用户所有充电详单
+    # 读取数据库
     success = None
     error_msg = None
     order_list = None
@@ -163,7 +175,9 @@ async def query_order_detail(request):
 @authorized()
 async def preview_queue(request):
     user = session.query(User).filter(User.username == get_username(request)).first()
-    # TODO: 处理，获取排队详情
+    # TODO(1): 处理，获取排队详情
+    # 读取数据库
+    # 算前方车辆
     success = None
     error_msg = None
     charge_id = None
@@ -190,7 +204,9 @@ async def preview_queue(request):
 @app.get('/admin/query_report')
 @authorized_admin()
 async def query_report(request):
-    # TODO: 处理，获取充电站的数据报表列表
+    # TODO(3): 处理，获取充电站的数据报表列表
+    # 读取数据库
+    # 用报表计算结果
     success = None
     error_msg = None
     report_list = None
@@ -209,7 +225,8 @@ async def query_report(request):
 @app.get('/admin/query_all_piles_stat')
 @authorized_admin()
 async def query_all_piles_stat(request):
-    # TODO: 处理，获取所有充电桩的统计信息
+    # TODO(2): 处理，获取所有充电桩的统计信息
+    # 读取数据库
     success = None
     error_msg = None
     stat_list = None
@@ -228,7 +245,8 @@ async def query_all_piles_stat(request):
 @app.get('/admin/query_queue')
 @authorized_admin()
 async def query_queue(request):
-    # TODO: 处理，获取目前所有正在排队的用户
+    # TODO(3): 处理，获取目前所有正在排队的用户
+    # 读取数据库
     success = None
     error_msg = None
     queue_list = None
@@ -250,7 +268,9 @@ async def query_queue(request):
 async def update_pile(request):
     charger_id = request.json.get('charger_id')
     status = request.json.get('status')
-    # TODO: 处理，更新充电桩状态
+    # TODO(3): 处理，更新充电桩状态
+    # 写数据库
+    # 触发调度
     success = None
     error_msg = None
     if success:
