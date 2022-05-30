@@ -32,6 +32,7 @@ async def login(request):
         return json({
             "code": 0,
             "message": "Success",
+            "is_admin": user.admin,
             "data": {
                 "token": token
             }
