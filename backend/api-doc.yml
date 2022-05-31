@@ -1,3 +1,30 @@
+# **简介：**
+
+# 用于北京邮电大学计算机学院2022软件工程组间联调。
+
+
+
+# **详细信息：**
+
+# 考虑到文档平台的兼容性，在这里特别注明鉴权规范。
+
+# 请求头：
+
+# ```
+# Authorization: Bearer example.jwt.token
+# ```
+
+# payload格式
+
+# ```json
+# // payload
+# {
+#   "username": "jinuo",  // 用户名字符串
+#   "role": "ADMIN"   // 角色，可选项：ADMIN, USER
+# }
+# ```
+
+# JWT建议永不过期
 openapi: 3.0.0
 servers:
   - url: "https://example.com/api"
@@ -43,10 +70,6 @@ paths:
                   description: 密码
                   maxLength: 32
                   example: i-hate-bupt
-                is_admin:
-                  type: boolean
-                  description: 是否是管理员
-                  example: true
       responses:
         "200":
           description: 通用响应
@@ -130,6 +153,8 @@ paths:
       summary: 提交充电请求
       description: "向服务端提交充电请求"
       operationId: submit_charging_request
+      security:
+        - bearerAuth: [USER]
       requestBody:
         description: 充电请求的详细信息
         required: true
@@ -190,6 +215,8 @@ paths:
       summary: 修改充电请求
       description: "修改已提交的充电请求，允许变更除电池容量外的信息"
       operationId: edit_charging_request
+      security:
+        - bearerAuth: [USER]
       requestBody:
         description: 充电请求的可修改信息
         required: true
@@ -235,6 +262,8 @@ paths:
       summary: 取消充电请求
       description: "请求取消排队或结束充电，并生成详单"
       operationId: end_charging_request
+      security:
+        - bearerAuth: [USER]
       responses:
         "200":
           description: 通用响应
@@ -258,6 +287,8 @@ paths:
       summary: 查看充电详单
       description: "查询指定充电请求的详单"
       operationId: query_order_detail
+      security:
+        - bearerAuth: [USER]
       responses:
         "200":
           description: 通用响应
@@ -283,7 +314,7 @@ paths:
                         order_id:
                           type: string
                           description: 排队号码（订单号）
-                          example: 20220101000001
+                          example: "20220101000001"
                         create_time:
                           type: string
                           format: date-time
@@ -323,7 +354,7 @@ paths:
                           description: 总费用（单位：元）
                           multipleOf: 0.01
                           example: 10.15
-                        charger_id:
+                        pile_id:
                           type: string
                           description: 充电桩号
                           example: C01
@@ -334,6 +365,8 @@ paths:
       summary: 预览排队情况
       description: "客户端预览目前的排队情况，返回本车排队号码与本充电模式下前车等待数量"
       operationId: preview_queue
+      security:
+        - bearerAuth: [USER]
       responses:
         "200":
           description: 通用响应
@@ -382,6 +415,8 @@ paths:
       summary: 查看报表
       description: "查看充电站的数据报表"
       operationId: query_report
+      security:
+        - bearerAuth: [ADMIN]
       responses:
         "200":
           description: 通用响应
@@ -430,8 +465,9 @@ paths:
                           example: 205
                         cumulative_charging_amount:
                           type: number
+                          description: 累计充电量（单位：Ah）
                           multipleOf: 0.01
-                          example: 累计充电量（单位：Ah）
+                          example: 1873.25
                         cumulative_charging_earning:
                           type: number
                           description: 累计充电费用（单位：元）
@@ -454,6 +490,8 @@ paths:
       summary: 查看所有充电桩状态
       description: "查询所有充电桩的统计信息"
       operationId: query_all_piles_stat
+      security:
+        - bearerAuth: [ADMIN]
       responses:
         "200":
           description: 通用响应
@@ -506,6 +544,8 @@ paths:
       summary: 查看总体排队情况
       description: "查询目前所有正在排队的用户"
       operationId: query_queue
+      security:
+        - bearerAuth: [ADMIN]
       responses:
         "200":
           description: 通用响应
@@ -529,11 +569,11 @@ paths:
                       type: object
                       properties:
                         pile_id:
-                          type: integer
+                          type: string
                           description: 充电桩编号
                           example: 172
                         user_id:
-                          type: integer
+                          type: string
                           description: 用户编号
                           example: 389
                         battery_size:
@@ -557,6 +597,8 @@ paths:
       summary: 更新充电桩状态
       description: "更新充电桩状态"
       operationId: update_pile
+      security:
+        - bearerAuth: [ADMIN]
       requestBody:
         description: 充电桩状态
         required: true
@@ -567,7 +609,7 @@ paths:
               required:
                 - status
               properties:
-                charger_id:
+                pile_id:
                   type: string
                   description: 充电桩号
                   example: C01
@@ -594,3 +636,10 @@ paths:
                     type: string
                     description: 响应消息
                     example: success
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "JWT校验请求头，格式：Authentication: Bearer a.b.c\nJWT的payload内的自定字段为role和username，均为字符串，role可选值为\"USER\"和\"ADMIN\""
