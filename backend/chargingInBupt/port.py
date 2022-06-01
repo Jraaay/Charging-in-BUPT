@@ -31,7 +31,7 @@ async def login(request):
                 "code": -1,
                 "message": "Invalid username or password"
             })
-        token = generate_token(user.id, username)
+        token = generate_token(username, user.admin)
         return json({
             "code": 0,
             "message": "Success",
@@ -53,6 +53,11 @@ async def register(request):
     username = request.json.get('username')
     password = request.json.get('password')
     re_password = request.json.get('re_password')
+    if password != re_password:
+        return json({
+            "code": -1,
+            "message": "Password not match"
+        })
     user = session.query(User).filter(User.username == username).first()
     if user is not None:
         return json({
@@ -367,7 +372,7 @@ async def query_queue(request):
 @json_validate(update_pile_json_schema)
 @authorized_admin()
 async def update_pile(request):
-    charger_id = request.json.get('charger_id')
+    pile_id = request.json.get('pile_id')
     status = request.json.get('status')
     # TODO(3): 处理，更新充电桩状态
     # 写数据库
