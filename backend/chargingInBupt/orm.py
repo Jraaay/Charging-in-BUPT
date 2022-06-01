@@ -42,6 +42,7 @@ class ChargeRecord(Base):
     user_id = Column(String(20))
     charge_time = Column(TEXT)
    @hqc 
+    record_id = Column(Integer(20))
     start_time =  Column(String(20))
     end_time =  Column(String(20))
 
