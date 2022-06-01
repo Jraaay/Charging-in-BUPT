@@ -454,7 +454,7 @@ paths:
                         pile_id:
                           type: integer
                           description: 充电桩编号
-                          example: 37
+                          example: P37
                         cumulative_usage_times:
                           type: integer
                           description: 累计使用次数
@@ -517,14 +517,15 @@ paths:
                         pile_id:
                           type: integer
                           description: 充电桩编号
+                          example: P37
                         status:
                           type: string
                           description: 充电桩状态
                           enum:
-                            - MAINTAINING
+                            - RUNNING
                             - SHUTDOWN
                             - UNAVAILABLE
-                          example: MAINTAINING
+                          example: RUNNING
                         cumulative_usage_times:
                           type: integer
                           description: 充电桩累计使用次数
@@ -571,11 +572,11 @@ paths:
                         pile_id:
                           type: string
                           description: 充电桩编号
-                          example: 172
-                        user_id:
+                          example: P37
+                        username:
                           type: string
-                          description: 用户编号
-                          example: 389
+                          description: 用户名
+                          example: jinuo
                         battery_size:
                           type: number
                           description: 电池容量（单位：Ah）
@@ -612,14 +613,14 @@ paths:
                 pile_id:
                   type: string
                   description: 充电桩号
-                  example: C01
+                  example: P37
                 status:
                   description: 充电桩状态
                   enum:
-                    - MAINTAINING
+                    - RUNNING
                     - SHUTDOWN
                     - UNAVAILABLE
-                  example: MAINTAINING
+                  example: RUNNING
       responses:
         "200":
           description: 通用响应
