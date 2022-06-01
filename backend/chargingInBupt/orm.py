@@ -1,5 +1,5 @@
 from email.policy import default
-from sqlalchemy import TEXT, Boolean, Column, Enum, Index, Integer, String, create_engine
+from sqlalchemy import TEXT, Boolean, Column, Enum, Index, Integer, String, create_engine, Float
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from chargingInBupt.config import CONFIG
@@ -28,6 +28,8 @@ class Charger(Base):
     # 表的结构:
     id = Column(String(20), primary_key=True)
     charger_status = Column(Enum('MAINTAINING', 'SHUTDOWN', 'UNAVAILABLE'))
+    wait_num = Column(Integer, default=0)
+    type = Column(String(20))
 
 
 class ChargeRecord(Base):
@@ -39,6 +41,22 @@ class ChargeRecord(Base):
     charger_id = Column(String(20))
     user_id = Column(String(20))
     charge_time = Column(TEXT)
+
+
+class ChargeRequest(Base):
+    # 表的名字:
+    __tablename__ = 'charge_request'
+
+    # 表的结构:
+    id = Column(String(20), primary_key=True)
+    state = Column(Integer, default=0)              # 0代表等候区等待，1代表在充电桩等待，2代表正在充电，3代表充电完成
+    user_id = Column(String(20))
+    charge_mode = Column(String(20))
+    require_amount = Column(Float)      # 充电量
+    charge_time = Column(Float)         # 充电所需时间：充电量除以功率
+    battery_size = Column(Float)        # 电池电量大小
+    charge_id = Column(String(20))      # 等候区排队号
+    charge_pile_id = id = Column(String(20)) # 充电桩编号
 
 
 # 初始化数据库连接:
