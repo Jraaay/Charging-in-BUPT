@@ -37,15 +37,17 @@ info:
     email: kino@bupt.edu.cn
     name: kino
 tags:
+  - name: generic
+    description: 通用API
   - name: user
     description: 用户客户端相关API
   - name: admin
     description: 管理员客户端相关API
 paths:
-  /user/login:
+  /login:
     post:
       tags:
-        - user
+        - generic
       summary: 登陆
       description: "用户登录，返回JWT"
       operationId: login
@@ -94,6 +96,46 @@ paths:
                         type: string
                         description: jwt token
                         example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6ImppbnVvIiwiaWF0IjoxNTE2MjM5MDIyfQ.WhOxJUL0ZfPW6zrLNdkbQvoE8JObEB_5kr9DkgEVDeE
+                      is_admin:
+                        type: boolean
+                        description: 是否是管理员用户
+                        example: false
+  /time:
+    get:
+      tags:
+        - generic
+      summary: 查询时间
+      description: "查询后端时间，替换前端所有当前时间查询。返回加速的时间，用于模拟分段计时，需要后端实现对时间的mock。"
+      operationId: time
+      responses:
+        "200":
+          description: 通用响应
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 状态码（成功0，失败-1）
+                    example: 0
+                  message:
+                    type: string
+                    description: 响应消息
+                    example: success
+                  data:
+                    type: object
+                    description: 响应数据体
+                    properties:
+                      datetime:
+                        type: string
+                        format: date-time
+                        description: 日期-时间
+                        example: 2022-01-01 11:11:11
+                      timestamp:
+                        type: integer
+                        description: UNIX 时间戳（秒）
+                        example: 1654087836
   /user/register:
     post:
       tags:
@@ -174,15 +216,13 @@ paths:
                   minLength: 1
                   example: F
                 require_amount:
-                  type: number
-                  description: 请求充电量（单位：Ah）
-                  multipleOf: 0.01
-                  example: 47.74
+                  type: string
+                  description: 请求充电量（单位：Ah 精确到2位小数）
+                  example: "47.74"
                 battery_size:
-                  type: number
-                  description: 电池容量（单位：Ah）
-                  multipleOf: 0.01
-                  example: 60.00
+                  type: string
+                  description: 电池容量（单位：Ah 精确到2位小数）
+                  example: "60.00"
       responses:
         "200":
           description: 通用响应
@@ -235,10 +275,9 @@ paths:
                   minLength: 1
                   example: F
                 require_amount:
-                  type: number
-                  description: 请求充电量（单位：Ah）
-                  multipleOf: 0.01
-                  example: 47.74
+                  type: string
+                  description: 请求充电量（单位：Ah 精确到2位小数）
+                  example: "47.74"
       responses:
         "200":
           description: 通用响应
@@ -322,9 +361,8 @@ paths:
                           example: 2022-01-01 12:11:11
                         charged_amount:
                           type: number
-                          description: 充电电量（单位：Ah）
-                          multipleOf: 0.01
-                          example: 14.53
+                          description: 充电电量（单位：Ah 精确到2位小数）
+                          example: "14.53"
                         charged_time:
                           type: integer
                           description: 充电时长（单位：秒）
@@ -341,19 +379,16 @@ paths:
                           example: 2022-01-01 12:11:11
                         charging_cost:
                           type: number
-                          description: 充电费用（单位：元）
-                          multipleOf: 0.01
-                          example: 8.92
+                          description: 充电费用（单位：元 精确到2位小数）
+                          example: "8.92"
                         service_cost:
                           type: number
-                          description: 服务费用（单位：元）
-                          multipleOf: 0.01
-                          example: 1.23
+                          description: 服务费用（单位：元 精确到2位小数）
+                          example: "1.23"
                         total_cost:
                           type: number
-                          description: 总费用（单位：元）
-                          multipleOf: 0.01
-                          example: 10.15
+                          description: 总费用（单位：元 精确到2位小数）
+                          example: "10.15"
                         pile_id:
                           type: string
                           description: 充电桩号
@@ -465,24 +500,20 @@ paths:
                           example: 205
                         cumulative_charging_amount:
                           type: number
-                          description: 累计充电量（单位：Ah）
-                          multipleOf: 0.01
+                          description: 累计充电量（单位：Ah 精确到2位小数）
                           example: 1873.25
                         cumulative_charging_earning:
                           type: number
-                          description: 累计充电费用（单位：元）
-                          multipleOf: 0.01
-                          example: 2312.12
+                          description: 累计充电费用（单位：元 精确到2位小数）
+                          example: "2312.12"
                         cumulative_service_earning:
                           type: number
-                          description: 累计服务费用（单位：元）
-                          multipleOf: 0.01
-                          example: 121.08
+                          description: 累计服务费用（单位：元 精确到2位小数）
+                          example: "121.08"
                         cumulative_earning:
                           type: number
-                          description: 累计总费用（单位：元）
-                          multipleOf: 0.01
-                          example: 2433.20
+                          description: 累计总费用（单位：元 精确到2位小数）
+                          example: "2433.20"
   /admin/query_all_piles_stat:
     get:
       tags:
@@ -579,14 +610,12 @@ paths:
                           example: jinuo
                         battery_size:
                           type: number
-                          description: 电池容量（单位：Ah）
-                          multipleOf: 0.01
-                          example: 60.00
+                          description: 电池容量（单位：Ah 精确到2位小数）
+                          example: "60.00"
                         require_amount:
                           type: number
-                          description: 请求充电量（单位：Ah）
-                          multipleOf: 0.01
-                          example: 47.74
+                          description: 请求充电量（单位：Ah 精确到2位小数）
+                          example: "47.74"
                         waiting_time:
                           type: integer
                           description: 已等待时间（单位：秒）
