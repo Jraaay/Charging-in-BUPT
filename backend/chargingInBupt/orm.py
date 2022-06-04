@@ -41,7 +41,6 @@ class ChargeRecord(Base):
     charger_id = Column(String(20))
     user_id = Column(String(20))
     charge_time = Column(TEXT)
-   @hqc 
     record_id = Column(Integer(20))
     start_time =  Column(String(20))
     end_time =  Column(String(20))
@@ -53,7 +52,7 @@ class ChargeRequest(Base):
 
     # 表的结构:
     id = Column(String(20), primary_key=True)
-    state = Column(Integer, default=0)              # 0代表等候区等待，1代表在充电桩等待，2代表正在充电，3代表充电完成
+    state = Column(Integer, default=0)              # 0代表不在充电，1代表在等候区等待，2代表充电区等待，3代表正在充电，4表示充电模式更改导致的重新排队，5表示充电桩故障需要转移充电桩
     user_id = Column(String(20))
     charge_mode = Column(String(20))
     require_amount = Column(Float)      # 充电量
