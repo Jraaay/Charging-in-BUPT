@@ -28,8 +28,25 @@ class Charger(Base):
     # 表的结构:
     id = Column(String(20), primary_key=True)
     charger_status = Column(Enum('MAINTAINING', 'SHUTDOWN', 'UNAVAILABLE'))
-    wait_num = Column(Integer, default=0)
+    #wait_num = Column(Integer, default=0)
     type = Column(String(20))
+
+    charge_list = Column(list)  #充电区
+    FastCharingPileNum = Column(Integer,default=2)  #快充电桩数
+    TrickleChargingPileNum = Column(Integer,default=3)  #慢充电桩数
+    ChargingQueueLen = Column(Integer)  #充电桩排队队列长度
+    last_end_time = Column(String(20))  #当前充电桩充电区最后一辆车预计充电结束时间
+
+
+class WaitArea(Base):
+    # 表的名字:
+    __tablename__ = 'wait_area'
+
+    # 表的结构:
+    type = Column(String(20))  #F/T
+    charge_wait_list = Column(list)  #充电区的等候区
+    wait_list = Column(list)  #等候区
+    WaitingAreaSize = Column(Integer)  #等候区车位容量
 
 
 class ChargeRecord(Base):
