@@ -60,7 +60,7 @@ class ChargeRecord(Base):
     user_id = Column(String(20))  # 用户id
     charge_amount = Column(Integer(10))  # 充电电量
     charge_time = Column(TEXT)  # 充电时长
-    # @hqc
+
     record_id = Column(Integer(20))
     start_time = Column(String(20))  # 启动时间
     end_time = Column(String(20))  # 停止时间
