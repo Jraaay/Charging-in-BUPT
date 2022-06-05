@@ -108,9 +108,9 @@ async def submit_charging_request(request):
             })
 
             if charge_mode == "F":
-                charge_time = require_amount/CONFIG['cfg']['F_power']
+                charge_time = require_amount/CONFIG['cfg']['F_power']*60
             elif charge_mode == "T":
-                charge_time = require_amount/CONFIG['cfg']['T_power']
+                charge_time = require_amount/CONFIG['cfg']['T_power']*60
             # 生成charge_id,加入队列
             his_front_cars = session.query(WaitQueue).filter(WaitQueue.type == charge_mode).count()
             if his_front_cars == 0:
@@ -262,11 +262,16 @@ async def preview_queue(request):
             place = None
         # 算前方车辆
         if record.state == 1:
-            queue_len = session.query(WaitQueue).filter(WaitQueue.type == record.charge_mode and WaitQueue.state == 1).count()
+            num_wait = session.query(WaitQueue).filter(WaitQueue.type == record.charge_mode and WaitQueue.state == 1).count()
+            charge_mode_piles = session.query(Charger).filter(Charger.type == record.charge_mode).all()
+            num_charge_wait = 0
+            for pile in charge_mode_piles:
+                num_charge_wait = num_charge_wait + len(pile.charge_list)
+            queue_len = num_wait + num_charge_wait
         elif record.state == 2:
             # queue_len = 对应record.charge_pile_id充电桩前面车的数量
             charge_pile = session.query(Charger).filter(Charger.id == record.charge_pile_id).first()
-            queue_len = charge_pile.wait_num
+            queue_len = len(charge_pile.charge_list)
         elif record.state == 3:
             queue_len = 0
         else:

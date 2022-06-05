@@ -81,7 +81,7 @@ class ChargeRequest(Base):
     user_id = Column(String(20))
     charge_mode = Column(String(20))
     require_amount = Column(Float)  # 充电量
-    charge_time = Column(Float)  # 充电所需时间：充电量除以功率
+    charge_time = Column(Float)  # 充电所需时间：充电量除以功率 单位：s
     battery_size = Column(Float)  # 电池电量大小
     charge_id = Column(String(20))  # 等候区排队号
     charge_pile_id = Column(String(20))  # 充电桩编号
