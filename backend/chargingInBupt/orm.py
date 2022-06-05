@@ -67,8 +67,18 @@ class ChargeRequest(Base):
     charge_time = Column(Float)  # 充电所需时间：充电量除以功率
     battery_size = Column(Float)  # 电池电量大小
     charge_id = Column(String(20))  # 等候区排队号
-    charge_pile_id = id = Column(String(20))  # 充电桩编号
+    charge_pile_id = Column(String(20))  # 充电桩编号
 
+
+class WaitQueue(Base):
+    # 表的名字:等候区队列
+    __tablename__ = 'wait_queue'
+
+    # 表的结构：
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    type = Column(Enum('F', 'T'))
+    state = Column(Integer)    # 0代表排队号无效，1代表排队号有效（即在排队队列中）
+    charge_id = Column(String(20))  # 等候区排队号
 
 
 # 初始化数据库连接:
@@ -78,5 +88,5 @@ engine = create_engine('mysql+mysqlconnector://' + CONFIG['db']['user'] + ':' + 
 # 创建DBSession类型:
 session = sessionmaker(bind=engine)()
 
- Base.metadata.drop_all(engine)
- Base.metadata.create_all(engine)
+ #Base.metadata.drop_all(engine)
+ #Base.metadata.create_all(engine)
