@@ -11,7 +11,7 @@ Base = declarative_base()
 
 
 class User(Base):
-    # 表的名字:
+    # 表的名字:用户
     __tablename__ = 'user'
 
     # 表的结构:
@@ -22,7 +22,7 @@ class User(Base):
 
 
 class Charger(Base):
-    # 表的名字:
+    # 表的名字:充电桩
     __tablename__ = 'charger'
 
     # 表的结构:
@@ -33,21 +33,29 @@ class Charger(Base):
 
 
 class ChargeRecord(Base):
-    # 表的名字:
+    # 表的名字:充电详单
     __tablename__ = 'charge_record'
 
     # 表的结构:
-    id = Column(String(20), primary_key=True)
-    charger_id = Column(String(20))
-    user_id = Column(String(20))
-    charge_time = Column(TEXT)
+    id = Column(String(20), primary_key=True)  # 编号
+    create_time = Column(String(20))  # 详单生成时间
+    charger_id = Column(String(20))  # 充电桩id
+    user_id = Column(String(20))  # 用户id
+    charge_amount = Column(Integer(10))  # 充电电量
+    charge_time = Column(TEXT)  # 充电时长
+    # @hqc
     record_id = Column(Integer(20))
-    start_time =  Column(String(20))
-    end_time =  Column(String(20))
+    start_time = Column(String(20))  # 启动时间
+    end_time = Column(String(20))  # 停止时间
+
+    charge_money = Column(Float)  # 充电费用
+    service_money = Column(Float)  # 服务费用
+    total_time = Column(Float)  # 总费用
+    is_cancel = Column(Boolean)  # 是否被主动取消
 
 
 class ChargeRequest(Base):
-    # 表的名字:
+    # 表的名字:充电请求
     __tablename__ = 'charge_request'
 
     # 表的结构:
@@ -55,18 +63,20 @@ class ChargeRequest(Base):
     state = Column(Integer, default=0)              # 0代表不在充电，1代表在等候区等待，2代表充电区等待，3代表正在充电，4表示充电模式更改导致的重新排队，5表示充电桩故障需要转移充电桩
     user_id = Column(String(20))
     charge_mode = Column(String(20))
-    require_amount = Column(Float)      # 充电量
-    charge_time = Column(Float)         # 充电所需时间：充电量除以功率
-    battery_size = Column(Float)        # 电池电量大小
-    charge_id = Column(String(20))      # 等候区排队号
-    charge_pile_id = id = Column(String(20)) # 充电桩编号
+    require_amount = Column(Float)  # 充电量
+    charge_time = Column(Float)  # 充电所需时间：充电量除以功率
+    battery_size = Column(Float)  # 电池电量大小
+    charge_id = Column(String(20))  # 等候区排队号
+    charge_pile_id = id = Column(String(20))  # 充电桩编号
+
 
 
 # 初始化数据库连接:
 engine = create_engine('mysql+mysqlconnector://' + CONFIG['db']['user'] + ':' + CONFIG['db']['password'] +
-                       '@' + CONFIG['db']['host'] + ':' + str(CONFIG['db']['port']) + '/' + CONFIG['db']['db'], echo=False)
+                       '@' + CONFIG['db']['host'] + ':' + str(CONFIG['db']['port']) + '/' + CONFIG['db']['db'],
+                       echo=False)
 # 创建DBSession类型:
 session = sessionmaker(bind=engine)()
 
-# Base.metadata.drop_all(engine)
-# Base.metadata.create_all(engine)
+ Base.metadata.drop_all(engine)
+ Base.metadata.create_all(engine)
