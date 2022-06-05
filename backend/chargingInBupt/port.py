@@ -2,7 +2,7 @@ from sanic import Sanic, json
 from sanic.response import text
 
 from chargingInBupt.auth import authorized, generate_token, authorized_admin, get_username
-from chargingInBupt.orm import User, session, ChargeRequest, WaitQueue, Charger
+from chargingInBupt.orm import User, session, ChargeRequest, WaitQueue, Charger, WaitArea
 from chargingInBupt.json_validate import json_validate
 from chargingInBupt.json_schema import *
 from chargingInBupt.config import CONFIG
@@ -100,6 +100,13 @@ async def submit_charging_request(request):
         request_id = str(record_num + 1)
         # 插入对应队列
         if session.query(WaitQueue).filter(WaitQueue.statue == 1).count() < CONFIG['cfg']['N']:
+            # WaitArea 等候区队列处理
+            wait_area = session.query(WaitArea).filter(WaitArea.type == charge_mode).first()
+            wait_area.wait_list.append(request_id)
+            session.query(WaitArea).filter(WaitArea.type == charge_mode).update({
+                "wait_list": wait_area.wait_list
+            })
+
             if charge_mode == "F":
                 charge_time = require_amount/CONFIG['cfg']['F_power']
             elif charge_mode == "T":
@@ -159,6 +166,11 @@ async def edit_charging_request(request):
         # 如果充电模式有修改则放到队列最后
         charge_id = record.charge_id
         if record.charge_mode != charge_mode:
+            # WaitArea 等候区相关处理
+            wait_area = session.query(WaitArea).filter(WaitArea.type == record.charge_mode).first()
+            wait_area.wait_list.remove(record.id)
+            wait_area.wait_list.append(record.id)
+
             res = session.query(func.max(int(WaitQueue.charge_id[1:]))).filter(WaitQueue.type == charge_mode).first()
             charge_id = charge_mode + str(res[0]+1)
             session.query(WaitQueue).filter(WaitQueue.charge_id == record.charge_id).update({
