@@ -2,12 +2,11 @@ from sanic import Sanic, json
 from sanic.response import text
 
 from chargingInBupt.auth import authorized, generate_token, authorized_admin, get_username
-from chargingInBupt.orm import User, session, ChargeRequest, WaitQueue, Charger, WaitArea
+from chargingInBupt.orm import User, session, ChargeRequest, WaitQueue, Charger, WaitArea, ChargeRecord
 from chargingInBupt.json_validate import json_validate
 from chargingInBupt.json_schema import *
 from chargingInBupt.config import CONFIG
 from sqlalchemy import func
-
 
 app = Sanic("Charging_in_BUPT")
 
@@ -92,7 +91,8 @@ async def submit_charging_request(request):
     # TODO(1): 处理，获取 charge_id
     # 判断是否不在充电状态:没有充电记录或者不存在待充电请求则代表不在充电状态
     record = session.query(ChargeRequest).filter(ChargeRequest.user_id == user.id).first()
-    undo_record = session.query(ChargeRequest).filter(ChargeRequest.user_id == user.id and ChargeRequest.state in [1,2,3,4,5]).first()
+    undo_record = session.query(ChargeRequest).filter(
+        ChargeRequest.user_id == user.id and ChargeRequest.state in [1, 2, 3, 4, 5]).first()
     charge_time = None
     if record is None or undo_record is None:
         # 请求id
@@ -108,21 +108,24 @@ async def submit_charging_request(request):
             })
 
             if charge_mode == "F":
-                charge_time = require_amount/CONFIG['cfg']['F_power']*60
+                charge_time = require_amount / CONFIG['cfg']['F_power'] * 60
             elif charge_mode == "T":
-                charge_time = require_amount/CONFIG['cfg']['T_power']*60
+                charge_time = require_amount / CONFIG['cfg']['T_power'] * 60
             # 生成charge_id,加入队列
             his_front_cars = session.query(WaitQueue).filter(WaitQueue.type == charge_mode).count()
             if his_front_cars == 0:
-                charge_id = charge_mode + str(his_front_cars+1)
+                charge_id = charge_mode + str(his_front_cars + 1)
             else:
                 # ？不是很确定这样求最大值对不对
-                res = session.query(func.max(int(WaitQueue.charge_id[1:]))).filter(WaitQueue.type == charge_mode).first()
-                charge_id = charge_mode + str(res[0]+1)
+                res = session.query(func.max(int(WaitQueue.charge_id[1:]))).filter(
+                    WaitQueue.type == charge_mode).first()
+                charge_id = charge_mode + str(res[0] + 1)
             session.add(WaitQueue(type=charge_mode, state=1, charge_id=charge_id))
             session.commit()
             # 生成充电请求，插入数据库
-            charge_request = ChargeRequest(id=request_id, state=1, user_id=user.id, charge_mode=charge_mode, require_amount=float(require_amount), charge_time=charge_time, battery_size=float(battery_size), charge_id=charge_id)
+            charge_request = ChargeRequest(id=request_id, state=1, user_id=user.id, charge_mode=charge_mode,
+                                           require_amount=float(require_amount), charge_time=charge_time,
+                                           battery_size=float(battery_size), charge_id=charge_id)
             session.add(charge_request)
             session.commit()
             success = True
@@ -172,7 +175,7 @@ async def edit_charging_request(request):
             wait_area.wait_list.append(record.id)
 
             res = session.query(func.max(int(WaitQueue.charge_id[1:]))).filter(WaitQueue.type == charge_mode).first()
-            charge_id = charge_mode + str(res[0]+1)
+            charge_id = charge_mode + str(res[0] + 1)
             session.query(WaitQueue).filter(WaitQueue.charge_id == record.charge_id).update({
                 "charge_id": charge_id
             })
@@ -221,15 +224,33 @@ async def end_charging_request(request):
             "message": error_msg
         })
 
+
 @app.get('/user/query_order_detail')
 @authorized()
 async def query_order_detail(request):
     user = session.query(User).filter(User.username == get_username(request)).first()
-    # TODO(2): 处理，获取该用户所有充电详单
+    # TODO(2): 处理，获取该用户所有充电详单  √
+    order_list = []
     # 读取数据库
-    success = None
-    error_msg = None
-    order_list = None
+    for record in session.query(ChargeRecord).filter(ChargeRecord.user_id == user.id):
+        order_list.append({
+            "order_id": record.order_id,
+            "create_time": record.create_time,
+            "charged_amount": record.charged_amount,
+            "charged_time": record.charged_time,
+            "begin_time": record.begin_time,
+            "end_time": record.end_time,
+            "charging_cost": record.charging_cost,
+            "service_cost": record.service_cost,
+            "total_cost": record.total_cost,
+            "pile_id": record.pile_id
+        })
+    if record is None:
+        success = False
+        error_msg = "该用户无充电详单"
+    else:
+        success = True
+
     if success:
         return json({
             "code": 0,
@@ -242,34 +263,36 @@ async def query_order_detail(request):
             "message": error_msg
         })
 
+
 @app.get('/user/preview_queue')
 @authorized()
 async def preview_queue(request):
     user = session.query(User).filter(User.username == get_username(request)).first()
     # TODO(1): 处理，获取排队详情
     # 读取数据库
-    record = session.query(ChargeRequest).filter(ChargeRequest.user_id == user.id and ChargeRequest.state in [1,2,3,4,5]).first()
+    record = session.query(ChargeRequest).filter(
+        ChargeRequest.user_id == user.id and ChargeRequest.state in [1, 2, 3, 4, 5]).first()
     # 若存在还未结束的充电请求
     if record is not None:
         charge_id = record.charge_id
-        info = ['', "WAITINGSTAGE1","WAITINGSTAGE2","CHARGING"]
+        info = ['', "WAITINGSTAGE1", "WAITINGSTAGE2", "CHARGING"]
         cur_state = info[record.state]
         if record.state == 1:
             place = "WAITINGPLACE"
-        elif record.state in [2,3]:
+        elif record.state in [2, 3]:
             place = record.charge_pile_id
         else:
             place = None
         # 算前方车辆
         if record.state == 1:
-            num_wait = session.query(WaitQueue).filter(WaitQueue.type == record.charge_mode and WaitQueue.state == 1).count()
+            num_wait = session.query(WaitQueue).filter(
+                WaitQueue.type == record.charge_mode and WaitQueue.state == 1).count()
             charge_mode_piles = session.query(Charger).filter(Charger.type == record.charge_mode).all()
             num_charge_wait = 0
             for pile in charge_mode_piles:
                 num_charge_wait = num_charge_wait + len(pile.charge_list)
             queue_len = num_wait + num_charge_wait
         elif record.state == 2:
-            # queue_len = 对应record.charge_pile_id充电桩前面车的数量
             charge_pile = session.query(Charger).filter(Charger.id == record.charge_pile_id).first()
             queue_len = len(charge_pile.charge_list)
         elif record.state == 3:
@@ -307,6 +330,7 @@ async def preview_queue(request):
             "message": error_msg
         })
 
+
 @app.get('/admin/query_report')
 @authorized_admin()
 async def query_report(request):
@@ -328,14 +352,27 @@ async def query_report(request):
             "message": error_msg
         })
 
+
 @app.get('/admin/query_all_piles_stat')
 @authorized_admin()
 async def query_all_piles_stat(request):
-    # TODO(2): 处理，获取所有充电桩的统计信息
+    # TODO(2): 处理，获取所有充电桩的统计信息  √
     # 读取数据库
-    success = None
-    error_msg = None
-    stat_list = None
+    stat_list = []
+    for charger in session.query(Charger).order_by(Charger.id):
+        stat_list.append({
+            "pile_id": charger.id,
+            "status": charger.charger_status,
+            "cumulative_usage_times": charger.cumulative_usage_times,
+            "cumulative_charging_time": charger.cumulative_charging_time,
+            "cumulative_charging_amount": charger.cumulative_charging_amount
+        })
+    if charger is None:
+        success = False
+        error_msg = "无充电桩"
+    else:
+        success = True
+
     if success:
         return json({
             "code": 0,
@@ -347,6 +384,7 @@ async def query_all_piles_stat(request):
             "code": -1,
             "message": error_msg
         })
+
 
 @app.get('/admin/query_queue')
 @authorized_admin()
@@ -367,6 +405,7 @@ async def query_queue(request):
             "code": -1,
             "message": error_msg
         })
+
 
 @app.post('/admin/update_pile')
 @json_validate(update_pile_json_schema)
