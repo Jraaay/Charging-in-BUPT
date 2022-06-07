@@ -1,52 +1,46 @@
 <template>
   <el-container>
     <el-header>
-      <el-row>
-        <el-col :span="3">
+      <el-row style="display: flex; justify-content: space-between">
+        <svg
+          t="1653482435664"
+          class="icon"
+          viewBox="0 0 1109 1024"
+          version="1.1"
+          xmlns="http://www.w3.org/2000/svg"
+          p-id="2385"
+          width="30"
+          height="30"
+          style="margin-top: 15px; margin-right: 5px"
+        >
+          >
+          <path
+            d="M1066.666667 341.333333h-42.666667v405.333334a149.333333 149.333333 0 0 1-298.666667 0V298.666667a42.666667 42.666667 0 0 0-42.666666-42.666667v682.666667h85.333333v85.333333H0v-85.333333h85.333333V85.333333a85.333333 85.333333 0 0 1 85.333334-85.333333h426.666666a85.333333 85.333333 0 0 1 85.333334 85.333333v85.333334a128 128 0 0 1 128 128v448a64 64 0 0 0 128 0V341.333333h-42.666667a42.666667 42.666667 0 0 1-42.666667-42.666666V213.333333a42.666667 42.666667 0 0 1 42.666667-42.666666v-21.333334a21.333333 21.333333 0 0 1 42.666667 0V170.666667h85.333333v-21.333334a21.333333 21.333333 0 0 1 42.666667 0V170.666667a42.666667 42.666667 0 0 1 42.666666 42.666666v85.333334a42.666667 42.666667 0 0 1-42.666666 42.666666zM341.333333 810.666667l170.666667-170.666667H384v-128l-128 170.666667h128z m256-682.666667H170.666667v256h426.666666V128z m426.666667 85.333333h-85.333333a42.666667 42.666667 0 0 0 0 85.333334h85.333333a42.666667 42.666667 0 0 0 0-85.333334z"
+            p-id="2386"
+            fill="#ffffff"
+          ></path>
+        </svg>
+        <div class="title">巴普特充电管理系统</div>
+        <div class="user-icon" v-if="token != ''">
           <svg
-            t="1653482435664"
+            t="1653485792064"
             class="icon"
-            viewBox="0 0 1109 1024"
+            viewBox="0 0 1024 1024"
             version="1.1"
             xmlns="http://www.w3.org/2000/svg"
-            p-id="2385"
-            width="30"
-            height="30"
-            style="margin-top: 15px; margin-right: 5px"
+            p-id="3294"
+            width="20"
+            height="20"
+            @click="logout"
+            style="cursor: pointer"
           >
-            >
             <path
-              d="M1066.666667 341.333333h-42.666667v405.333334a149.333333 149.333333 0 0 1-298.666667 0V298.666667a42.666667 42.666667 0 0 0-42.666666-42.666667v682.666667h85.333333v85.333333H0v-85.333333h85.333333V85.333333a85.333333 85.333333 0 0 1 85.333334-85.333333h426.666666a85.333333 85.333333 0 0 1 85.333334 85.333333v85.333334a128 128 0 0 1 128 128v448a64 64 0 0 0 128 0V341.333333h-42.666667a42.666667 42.666667 0 0 1-42.666667-42.666666V213.333333a42.666667 42.666667 0 0 1 42.666667-42.666666v-21.333334a21.333333 21.333333 0 0 1 42.666667 0V170.666667h85.333333v-21.333334a21.333333 21.333333 0 0 1 42.666667 0V170.666667a42.666667 42.666667 0 0 1 42.666666 42.666666v85.333334a42.666667 42.666667 0 0 1-42.666666 42.666666zM341.333333 810.666667l170.666667-170.666667H384v-128l-128 170.666667h128z m256-682.666667H170.666667v256h426.666666V128z m426.666667 85.333333h-85.333333a42.666667 42.666667 0 0 0 0 85.333334h85.333333a42.666667 42.666667 0 0 0 0-85.333334z"
-              p-id="2386"
+              d="M1024 512l-100.937143 103.424-0.731428-0.768L768 770.596571l-103.497143-103.460571L746.422857 585.142857H329.142857v-146.285714h417.28l-81.92-82.029714L768 253.403429l154.331429 155.940571 0.731428-0.804571zM109.714286 182.857143v658.285714a73.142857 73.142857 0 0 0 73.142857 73.142857h365.714286v109.714286H146.285714a146.285714 146.285714 0 0 1-146.285714-146.285714V146.285714a146.285714 146.285714 0 0 1 146.285714-146.285714h402.285715v109.714286H182.857143a73.142857 73.142857 0 0 0-73.142857 73.142857z"
+              p-id="3295"
               fill="#ffffff"
             ></path>
           </svg>
-        </el-col>
-        <el-col :span="12">
-          <div class="title">巴普特充电管理系统</div>
-        </el-col>
-        <el-col :span="9">
-          <div class="user-icon" v-if="token != ''">
-            <svg
-              t="1653485792064"
-              class="icon"
-              viewBox="0 0 1024 1024"
-              version="1.1"
-              xmlns="http://www.w3.org/2000/svg"
-              p-id="3294"
-              width="20"
-              height="20"
-              @click="logout"
-              style="cursor: pointer"
-            >
-              <path
-                d="M1024 512l-100.937143 103.424-0.731428-0.768L768 770.596571l-103.497143-103.460571L746.422857 585.142857H329.142857v-146.285714h417.28l-81.92-82.029714L768 253.403429l154.331429 155.940571 0.731428-0.804571zM109.714286 182.857143v658.285714a73.142857 73.142857 0 0 0 73.142857 73.142857h365.714286v109.714286H146.285714a146.285714 146.285714 0 0 1-146.285714-146.285714V146.285714a146.285714 146.285714 0 0 1 146.285714-146.285714h402.285715v109.714286H182.857143a73.142857 73.142857 0 0 0-73.142857 73.142857z"
-                p-id="3295"
-                fill="#ffffff"
-              ></path>
-            </svg>
-          </div>
-        </el-col>
+        </div>
       </el-row>
     </el-header>
     <el-main class="main" v-if="token != ''">
@@ -121,7 +115,7 @@
           label="状态"
           :filter-method="filterTag"
           :filters="[
-            { text: '运行中', value: 'MAINTAINING' },
+            { text: '运行中', value: 'RUNNING' },
             { text: '已关闭', value: 'SHUTDOWN' },
             { text: '故障', value: 'UNAVAILABLE' },
           ]"
@@ -130,7 +124,7 @@
             <el-tag
               disable-transitions
               :type="
-                scope.row.status === 'MAINTAINING'
+                scope.row.status === 'RUNNING'
                   ? 'success'
                   : scope.row.status === 'SHUTDOWN'
                   ? 'info'
@@ -148,7 +142,7 @@
         />
         <el-table-column
           prop="cumulative_charging_amount"
-          label="充电电量（Ah）"
+          label="充电电量（Wh）"
         />
         <el-table-column fixed="right" label="操作" width="60">
           <template #default="scope">
@@ -184,12 +178,19 @@
   >
     <span>
       <div style="margin-bottom: 15px">
-        查看报表
-        <el-cascader
+        选择日期
+        <el-select
           v-model="selectedReportId"
-          :options="reports"
+          placeholder="选择日期"
           @change="handleReportChange"
-        />
+        >
+          <el-option
+            v-for="item in reportsRaw"
+            :key="item.day"
+            :label="'Day ' + item.day"
+            :value="item.day"
+          />
+        </el-select>
       </div>
       <el-descriptions border :column="1" v-if="selectedReport">
         <el-descriptions-item label="月" align="center">
@@ -234,7 +235,7 @@
       <span class="dialog-footer">
         <el-button
           :loading="selectChargerStatusButtonLoading[0]"
-          @click="confirmChangeChargerStatus('MAINTAINING')"
+          @click="confirmChangeChargerStatus('RUNNING')"
           plain
           type="primary"
           >开启</el-button
@@ -270,7 +271,7 @@
   >
     <span>
       <div style="margin-bottom: 15px">
-        查看报表
+        选择充电桩和用户
         <el-cascader
           v-model="selectedQueueId"
           :options="queues"
@@ -282,12 +283,12 @@
           {{ selectedQueue.pile_id }}
         </el-descriptions-item>
         <el-descriptions-item label="用户编号" align="center">
-          {{ selectedQueue.user_id }}
+          {{ selectedQueue.username }}
         </el-descriptions-item>
-        <el-descriptions-item label="电池容量（单位：Ah）" align="center">
+        <el-descriptions-item label="电池容量（单位：Wh）" align="center">
           {{ selectedQueue.battery_size }}
         </el-descriptions-item>
-        <el-descriptions-item label="请求充电量（单位：Ah）" align="center">
+        <el-descriptions-item label="请求充电量（单位：Wh）" align="center">
           {{ selectedQueue.require_amount }}
         </el-descriptions-item>
         <el-descriptions-item label="已等待时间（单位：秒）" align="center">
@@ -327,7 +328,7 @@ export default {
       queuesRaw: [],
       selectChargerStatusButtonLoading: [false, false, false],
       statusMap: {
-        MAINTAINING: "运行中",
+        RUNNING: "运行中",
         SHUTDOWN: "已关闭",
         UNAVAILABLE: "故障",
       },
@@ -348,7 +349,7 @@ export default {
         background: "rgba(255, 255, 255, 1)",
       });
       axios
-        .post("/api/user/login", {
+        .post("/user/login", {
           username: this.loginForm.username,
           password: this.loginForm.password,
         })
@@ -383,7 +384,7 @@ export default {
     checkCharger() {
       this.checkChargerButtonLoading = true;
       axios
-        .get("/api/admin/query_all_piles_stat")
+        .get("/admin/query_all_piles_stat")
         .then((res) => {
           if (res.data.code === 0) {
             this.piles_stat = res.data.data;
@@ -404,39 +405,12 @@ export default {
     },
     showReportFunc() {
       this.showReportButtonLoading = true;
-      axios.get("/api/admin/query_report").then((res) => {
+      axios.get("/admin/query_report").then((res) => {
         if (res.data.code === 0) {
           const data = res.data.data;
           this.reportsRaw = data;
-          const reports = [];
-          for (let i = 0; i < data.length; i++) {
-            const month = data[i].month;
-            const day = data[i].day;
-            const charger_id = data[i].pile_id;
-            reports[month] = reports[month] ?? {
-              value: month,
-              label: month + "月",
-              children: [],
-            };
-            reports[month].children.push({
-              value: day,
-              label: day + "日",
-              children: [],
-            });
-            // reports[month].children.find((item) => item.value === day)
-            reports[month].children[
-              reports[month].children.indexOf(
-                reports[month].children.find((item) => item.value === day)
-              )
-            ].children.push({
-              value: charger_id,
-              label: charger_id + "充电桩",
-            });
-          }
           this.reports = [];
-          for (const key in reports) {
-            this.reports.push(reports[key]);
-          }
+
           this.showReport = true;
           console.log(this.reports);
           ElMessage.success("查询成功");
@@ -456,10 +430,10 @@ export default {
     },
     confirmChangeChargerStatus(status) {
       this.selectChargerStatusButtonLoading[
-        status == "MAINTAINING" ? 0 : status == "SHUTDOWN" ? 1 : 2
+        status == "RUNNING" ? 0 : status == "SHUTDOWN" ? 1 : 2
       ] = true;
       axios
-        .post("/api/admin/update_pile", {
+        .post("/admin/update_pile", {
           charger_id: this.changeChargerId,
           status: status,
         })
@@ -472,7 +446,7 @@ export default {
             ElMessage.error(res.data.message);
           }
           this.selectChargerStatusButtonLoading[
-            status == "MAINTAINING" ? 0 : status == "SHUTDOWN" ? 1 : 2
+            status == "RUNNING" ? 0 : status == "SHUTDOWN" ? 1 : 2
           ] = false;
         })
         .catch((err) => {
@@ -481,9 +455,7 @@ export default {
     },
     handleReportChange() {
       this.selectedReport = this.reportsRaw.find(
-        (item) =>
-          item.month == this.selectedReportId[0] &&
-          item.day == this.selectedReportId[1]
+        (item) => item.day == this.selectedReportId
       );
       console.log(this.reportsRaw);
       console.log(this.selectedReport);
@@ -491,7 +463,7 @@ export default {
     showQueueFunc() {
       this.showQueueButtonLoading = true;
       axios
-        .get("/api/admin/query_queue")
+        .get("/admin/query_queue")
         .then((res) => {
           if (res.data.code === 0) {
             const data = res.data.data;
@@ -506,8 +478,8 @@ export default {
                 children: [],
               };
               queues[charger_id].children.push({
-                value: data[i].user_id,
-                label: data[i].user_id + "用户",
+                value: data[i].username,
+                label: data[i].username,
               });
             }
             this.queues = [];
@@ -532,7 +504,7 @@ export default {
       this.selectedQueue = this.queueRaw.find(
         (item) =>
           item.pile_id == this.selectedQueueId[0] &&
-          item.user_id == this.selectedQueueId[1]
+          item.username == this.selectedQueueId[1]
       );
     },
   },
