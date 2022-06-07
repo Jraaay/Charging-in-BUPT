@@ -88,6 +88,7 @@ class ChargeRequest(Base):
     battery_size = Column(Float)  # 电池电量大小
     charge_id = Column(String(20))  # 等候区排队号
     charge_pile_id = Column(String(20))  # 充电桩编号
+    request_submit_time = Column(Integer)  # 充电请求提交时间
 
 
 class WaitQueue(Base):

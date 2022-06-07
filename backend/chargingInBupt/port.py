@@ -1,4 +1,5 @@
 import datetime
+from chargingInBupt.Timer import Timer
 
 from sanic import Sanic, json
 from sanic.response import text
@@ -498,9 +499,28 @@ async def query_all_piles_stat(request):
 async def query_queue(request):
     # TODO(3): 处理，获取目前所有正在排队的用户
     # 读取数据库
+    user_in_queue = session.query(ChargeRequest).filter(ChargeRequest.state in [1, 2]).join(User, ChargeRequest.user_id == User.id).all()
+    timer = Timer()
+
     success = None
     error_msg = None
     queue_list = None
+    if user_in_queue is None:
+        success = False
+        error_msg = "没有正在排队的用户"
+    else:
+        success = True
+        queue_list=[]
+        for user in user_in_queue:
+            waiting_time = timer.get_cur_timestamp() - user.request_submit_time
+            queue_list.append({
+                "pile_id": user.charge_pile_id,
+                "username": user.username,
+                "battery_size": user.battery_size,
+                "require_amount": user.require_amount,
+                "waiting_time": waiting_time
+            })
+
     if success:
         return json({
             "code": 0,
