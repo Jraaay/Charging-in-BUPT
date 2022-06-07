@@ -685,9 +685,9 @@ export default {
       if (this.timer2) {
         clearInterval(this.timer2);
       }
-      this.timer1 = setInterval(() => {
-        this.refreshState();
-      }, 20000);
+      // this.timer1 = setInterval(() => {
+      //   this.refreshState();
+      // }, 20000);
       this.timer2 = setInterval(() => {
         this.refreshTime();
       }, 1000);
