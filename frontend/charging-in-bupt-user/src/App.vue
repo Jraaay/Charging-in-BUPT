@@ -20,55 +20,52 @@
   </div>
   <el-container>
     <el-header>
-      <el-row>
-        <el-col :span="3">
+      <el-row style="display: flex; justify-content: space-between">
+        <svg
+          t="1653482435664"
+          class="icon"
+          viewBox="0 0 1109 1024"
+          version="1.1"
+          xmlns="http://www.w3.org/2000/svg"
+          p-id="2385"
+          width="30"
+          height="30"
+          style="margin-top: 15px; margin-right: 5px"
+        >
+          >
+          <path
+            d="M1066.666667 341.333333h-42.666667v405.333334a149.333333 149.333333 0 0 1-298.666667 0V298.666667a42.666667 42.666667 0 0 0-42.666666-42.666667v682.666667h85.333333v85.333333H0v-85.333333h85.333333V85.333333a85.333333 85.333333 0 0 1 85.333334-85.333333h426.666666a85.333333 85.333333 0 0 1 85.333334 85.333333v85.333334a128 128 0 0 1 128 128v448a64 64 0 0 0 128 0V341.333333h-42.666667a42.666667 42.666667 0 0 1-42.666667-42.666666V213.333333a42.666667 42.666667 0 0 1 42.666667-42.666666v-21.333334a21.333333 21.333333 0 0 1 42.666667 0V170.666667h85.333333v-21.333334a21.333333 21.333333 0 0 1 42.666667 0V170.666667a42.666667 42.666667 0 0 1 42.666666 42.666666v85.333334a42.666667 42.666667 0 0 1-42.666666 42.666666zM341.333333 810.666667l170.666667-170.666667H384v-128l-128 170.666667h128z m256-682.666667H170.666667v256h426.666666V128z m426.666667 85.333333h-85.333333a42.666667 42.666667 0 0 0 0 85.333334h85.333333a42.666667 42.666667 0 0 0 0-85.333334z"
+            p-id="2386"
+            fill="#ffffff"
+          ></path>
+        </svg>
+        <div class="title">巴普特充电系统</div>
+        <div class="user-icon" v-if="token != ''">
           <svg
-            t="1653482435664"
+            t="1653485792064"
             class="icon"
-            viewBox="0 0 1109 1024"
+            viewBox="0 0 1024 1024"
             version="1.1"
             xmlns="http://www.w3.org/2000/svg"
-            p-id="2385"
-            width="30"
-            height="30"
-            style="margin-top: 15px; margin-right: 5px"
+            p-id="3294"
+            width="20"
+            height="20"
+            @click="logout"
+            style="cursor: pointer"
           >
-            >
             <path
-              d="M1066.666667 341.333333h-42.666667v405.333334a149.333333 149.333333 0 0 1-298.666667 0V298.666667a42.666667 42.666667 0 0 0-42.666666-42.666667v682.666667h85.333333v85.333333H0v-85.333333h85.333333V85.333333a85.333333 85.333333 0 0 1 85.333334-85.333333h426.666666a85.333333 85.333333 0 0 1 85.333334 85.333333v85.333334a128 128 0 0 1 128 128v448a64 64 0 0 0 128 0V341.333333h-42.666667a42.666667 42.666667 0 0 1-42.666667-42.666666V213.333333a42.666667 42.666667 0 0 1 42.666667-42.666666v-21.333334a21.333333 21.333333 0 0 1 42.666667 0V170.666667h85.333333v-21.333334a21.333333 21.333333 0 0 1 42.666667 0V170.666667a42.666667 42.666667 0 0 1 42.666666 42.666666v85.333334a42.666667 42.666667 0 0 1-42.666666 42.666666zM341.333333 810.666667l170.666667-170.666667H384v-128l-128 170.666667h128z m256-682.666667H170.666667v256h426.666666V128z m426.666667 85.333333h-85.333333a42.666667 42.666667 0 0 0 0 85.333334h85.333333a42.666667 42.666667 0 0 0 0-85.333334z"
-              p-id="2386"
+              d="M1024 512l-100.937143 103.424-0.731428-0.768L768 770.596571l-103.497143-103.460571L746.422857 585.142857H329.142857v-146.285714h417.28l-81.92-82.029714L768 253.403429l154.331429 155.940571 0.731428-0.804571zM109.714286 182.857143v658.285714a73.142857 73.142857 0 0 0 73.142857 73.142857h365.714286v109.714286H146.285714a146.285714 146.285714 0 0 1-146.285714-146.285714V146.285714a146.285714 146.285714 0 0 1 146.285714-146.285714h402.285715v109.714286H182.857143a73.142857 73.142857 0 0 0-73.142857 73.142857z"
+              p-id="3295"
               fill="#ffffff"
             ></path>
           </svg>
-        </el-col>
-        <el-col :span="12">
-          <div class="title">巴普特充电系统</div>
-        </el-col>
-        <el-col :span="9">
-          <div class="user-icon" v-if="token != ''">
-            <svg
-              t="1653485792064"
-              class="icon"
-              viewBox="0 0 1024 1024"
-              version="1.1"
-              xmlns="http://www.w3.org/2000/svg"
-              p-id="3294"
-              width="20"
-              height="20"
-              @click="logout"
-              style="cursor: pointer"
-            >
-              <path
-                d="M1024 512l-100.937143 103.424-0.731428-0.768L768 770.596571l-103.497143-103.460571L746.422857 585.142857H329.142857v-146.285714h417.28l-81.92-82.029714L768 253.403429l154.331429 155.940571 0.731428-0.804571zM109.714286 182.857143v658.285714a73.142857 73.142857 0 0 0 73.142857 73.142857h365.714286v109.714286H146.285714a146.285714 146.285714 0 0 1-146.285714-146.285714V146.285714a146.285714 146.285714 0 0 1 146.285714-146.285714h402.285715v109.714286H182.857143a73.142857 73.142857 0 0 0-73.142857 73.142857z"
-                p-id="3295"
-                fill="#ffffff"
-              ></path>
-            </svg>
-          </div>
-        </el-col>
+        </div>
       </el-row>
     </el-header>
     <el-main class="main" v-if="token != ''">
+      <div style="margin-bottom: 15px">
+        当前时间：<el-tag>{{ curTime }}</el-tag>
+      </div>
       <el-card class="box-card" v-if="nowCharging">
         <template #header>
           <div class="card-header">
@@ -175,13 +172,13 @@
           <el-input-number
             v-model="reqChargeForm.require_amount"
             :min="1"
-          />（单位：Ah）
+          />（单位：Wh）
         </el-form-item>
         <el-form-item label="电池容量">
           <el-input-number
             v-model="reqChargeForm.battery_size"
             :min="1"
-          />（单位：Ah）
+          />（单位：Wh）
         </el-form-item>
       </el-form>
     </span>
@@ -215,7 +212,7 @@
           <el-input-number
             v-model="reqChargeForm.require_amount"
             :min="1"
-          />（单位：Ah）
+          />（单位：Wh）
         </el-form-item>
       </el-form>
     </span>
@@ -265,10 +262,10 @@
           {{ order_list[selectedOrder].create_time }}
         </el-descriptions-item>
         <el-descriptions-item label="充电桩编号" align="center">
-          {{ order_list[selectedOrder].charger_id }}
+          {{ order_list[selectedOrder].pile_id }}
         </el-descriptions-item>
         <el-descriptions-item label="充电电量" align="center">
-          {{ order_list[selectedOrder].charged_amount }} Ah
+          {{ order_list[selectedOrder].charged_amount }} Wh
         </el-descriptions-item>
         <el-descriptions-item label="充电时长" align="center">
           {{
@@ -312,7 +309,7 @@
 </template>
 
 <script>
-import { ElMessage, ElLoading } from "element-plus";
+import { ElMessage, ElMessageBox, ElLoading } from "element-plus";
 import axios from "axios";
 export default {
   name: "App",
@@ -326,7 +323,7 @@ export default {
       });
       setTimeout(() => {
         axios
-          .get("/api/user/preview_queue", {
+          .get("/user/preview_queue", {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -368,7 +365,7 @@ export default {
         handler: () => {
           this.buttonLoading[0] = true;
           axios
-            .get("/api/user/query_order_detail")
+            .get("/user/query_order_detail")
             .then((res) => {
               if (res.data.code === 0) {
                 this.buttonLoading[0] = false;
@@ -404,7 +401,7 @@ export default {
         handler: () => {
           this.buttonLoading[2] = true;
           axios
-            .get("/api/user/end_charging_request")
+            .get("/user/end_charging_request")
             .then((res) => {
               if (res.data.code === 0) {
                 ElMessage.success("取消成功");
@@ -425,7 +422,7 @@ export default {
         handler: () => {
           this.buttonLoading[3] = true;
           axios
-            .get("/api/user/end_charging_request")
+            .get("/user/end_charging_request")
             .then((res) => {
               if (res.data.code === 0) {
                 ElMessage.success("完成充电");
@@ -450,7 +447,8 @@ export default {
     ];
     const operations = [0, 1, 2, 4].map((i) => allOpt[i]);
     return {
-      timer: null,
+      timer1: null,
+      timer2: null,
       nowCharging: false,
       chargingNo: "",
       curStep: "",
@@ -531,9 +529,15 @@ export default {
       selectedOrder: 0,
       reqChargeForm: {
         charge_mode: "快充",
-        require_amount: 0,
-        battery_size: 0,
+        require_amount: "0",
+        battery_size: "0",
       },
+      reqChangeChargeForm: {
+        charge_mode: "快充",
+        require_amount: "0",
+        battery_size: "0",
+      },
+      curTime: "2022-06-07 12:34:56",
     };
   },
   methods: {
@@ -547,7 +551,7 @@ export default {
         background: "rgba(255, 255, 255, 1)",
       });
       axios
-        .post("/api/user/login", {
+        .post("/login", {
           username: this.loginForm.username,
           password: this.loginForm.password,
         })
@@ -555,7 +559,7 @@ export default {
           if (res.data.code === 0) {
             const token = res.data.data.token;
             axios
-              .get("/api/user/preview_queue", {
+              .get("/user/preview_queue", {
                 headers: {
                   Authorization: `Bearer ${token}`,
                 },
@@ -595,7 +599,7 @@ export default {
     },
     register() {
       axios
-        .post("/api/user/register", {
+        .post("/user/register", {
           username: this.loginForm.username,
           password: this.loginForm.password,
           re_password: this.loginForm.passwordAgain,
@@ -632,7 +636,7 @@ export default {
     reqChargeFunc() {
       this.chargeReqLoading = true;
       axios
-        .post("/api/user/submit_charging_request", {
+        .post("/user/submit_charging_request", {
           charge_mode: this.reqChargeForm.charge_mode,
           require_amount: this.reqChargeForm.require_amount,
           battery_size: this.reqChargeForm.battery_size,
@@ -651,15 +655,15 @@ export default {
     reqChangeChargeDialogFunc() {
       this.reqChangeChargeForm = {
         charge_mode: "快充",
-        require_amount: 0,
-        battery_size: 0,
+        require_amount: "0",
+        battery_size: "0",
       };
       this.reqChangeChargeDialog = true;
     },
     reqChangeChargeFunc() {
       this.chargeReqLoading = true;
       axios
-        .post("/api/user/edit_charging_request", {
+        .post("/user/edit_charging_request", {
           charge_mode: this.reqChangeChargeForm.charge_mode,
           require_amount: this.reqChangeChargeForm.require_amount,
         })
@@ -675,23 +679,32 @@ export default {
         });
     },
     startTimer() {
-      if (this.timer) {
-        clearInterval(this.timer);
+      if (this.timer1) {
+        clearInterval(this.timer1);
       }
-      this.timer = setInterval(() => {
+      if (this.timer2) {
+        clearInterval(this.timer2);
+      }
+      this.timer1 = setInterval(() => {
         this.refreshState();
-      }, 5000);
+      }, 20000);
+      this.timer2 = setInterval(() => {
+        this.refreshTime();
+      }, 1000);
     },
     stopTimer() {
-      if (this.timer) {
-        clearInterval(this.timer);
+      if (this.timer1) {
+        clearInterval(this.timer1);
+      }
+      if (this.timer2) {
+        clearInterval(this.timer2);
       }
     },
     refreshState() {
       const token = this.token;
       if (token) {
         axios
-          .get("/api/user/preview_queue", {
+          .get("/user/preview_queue", {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -720,15 +733,29 @@ export default {
           });
       }
     },
+    refreshTime() {
+      axios
+        .get("/time")
+        .then((res) => {
+          if (res.data.code === 0) {
+            this.curTime = res.data.data.datetime;
+          } else {
+            ElMessage.error(res.data.message);
+          }
+        })
+        .catch((err) => {
+          ElMessage.error(err);
+        });
+    },
   },
   watch: {
     curStateId(val, old) {
       console.log(old, val);
-      // if (old != 0 && val != 0) {
-      //   ElMessageBox.alert("状态已更新，请注意您需要做的动作", "状态更新提醒", {
-      //     confirmButtonText: "好的",
-      //   });
-      // }
+      if (old != 0 && val != 0) {
+        ElMessageBox.alert("状态已更新，请注意您需要做的动作", "状态更新提醒", {
+          confirmButtonText: "好的",
+        });
+      }
       if (val == 0) {
         this.nowCharging = false;
       } else {
