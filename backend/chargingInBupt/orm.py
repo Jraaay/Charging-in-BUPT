@@ -43,7 +43,11 @@ class Charger(Base):
 
     start_time = Column(Integer, default=0)  # 充电桩的启动时间
 
-
+class Charge_list(Base):
+     __tablename__ = 'charge_list'
+     id = Column(String(20), primary_key=True)
+     charge_list = Column(list)
+     
 class WaitArea(Base):
     # 表的名字:
     __tablename__ = 'wait_area'
