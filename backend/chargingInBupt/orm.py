@@ -38,7 +38,7 @@ class Charger(Base):
 
     cumulative_usage_times = Column(Integer, default=0)  # 充电桩累计使用次数
     cumulative_charging_time = Column(Integer, default=0)  # 充电桩累计充电时间
-    cumulative_charging_amount = Column(String, default="0")  # 充电桩累计充电电量
+    cumulative_charging_amount = Column(String(20), default="0")  # 充电桩累计充电电量
 
     start_time = Column(Integer, default=0)  # 充电桩的启动时间
 
@@ -48,7 +48,7 @@ class ChargeArea(Base):
     __tablename__ = 'charge_area'  
     # 表的结构:
     pile_id = Column(String(20))  # 充电桩号
-    request_id = Column(String(20))
+    request_id = Column(String(20), primary_key=True)
 
 
 class ChargeWaitArea(Base):
@@ -56,7 +56,7 @@ class ChargeWaitArea(Base):
     __tablename__ = 'charge_wait_area'  
     # 表的结构:
     type = Column(String(20))  # F/T
-    request_id = Column(String(20))
+    request_id = Column(String(20), primary_key=True)
     WaitingAreaSize = Column(Integer)  # 等候区车位容量
 
 
@@ -66,7 +66,7 @@ class WaitArea(Base):
 
     # 表的结构:
     type = Column(String(20))  # F/T
-    request_id = Column(String(20))
+    request_id = Column(String(20), primary_key=True)
     WaitingAreaSize = Column(Integer)  # 等候区车位容量
 
 

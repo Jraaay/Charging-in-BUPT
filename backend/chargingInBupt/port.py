@@ -223,10 +223,11 @@ async def end_charging_request(request):
     else:
         # 1.生成详单
         # 生成详单前面部分
-        record_id = str(session.query(ChargeRecord).count() + 1)
-        now = datetime.datetime.now()
-        create_time = now.strftime("%Y-%m-%d %H:%M:%S")
+        timer = Timer()
+        create_time = timer.get_cur_format_time()  # 用内置的timer类获取格式化模拟时间字符串
+        now = datetime.datetime.strptime(create_time, "%Y-%m-%d %H:%M:%S")  # 把格式化字符串转换为datetime类以进行计算
         order_id = now.strftime("%Y%m%d") + '%06d' % request.id  # "order_id": "20220101000001",
+        record_id = str(session.query(ChargeRecord).count() + 1)
 
         # 如果当前不在充电:直接生成充电详单
         if request.state != 3:
@@ -248,8 +249,8 @@ async def end_charging_request(request):
                 rate = 30
             else:
                 rate = 10
-            charged_amount = '%.2f' % (charged_time / 3600 * rate)  # 充电量
-            service_cost = '%.2f' % (0.8 * charged_amount)  # 服务费用
+            charged_amount = '%0.2f' % (charged_time / 3600 * rate)  # 充电量
+            service_cost = '%0.2f' % (0.8 * float(charged_amount))  # 服务费用
             # 计算充电费用：将一天分成6个时间区域，只考虑24h内充完电的情况
             # 07：00 - 10：00  1  平时  0.7元/度
             # 10：00 - 15：00  2  峰时  1.0元/度
@@ -323,7 +324,7 @@ async def end_charging_request(request):
             "state": 0
         })
 
-        # 3.触发调度！
+        # 3.*******触发调度*******
 
     if success:
         return json({
