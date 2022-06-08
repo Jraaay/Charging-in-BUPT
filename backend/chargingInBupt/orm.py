@@ -31,7 +31,6 @@ class Charger(Base):
     charger_status = Column(Enum('MAINTAINING', 'SHUTDOWN', 'UNAVAILABLE'))
     type = Column(String(20))
 
-    charge_list = Column(list)  # 充电区
     FastCharingPileNum = Column(Integer, default=2)  # 快充电桩数
     TrickleChargingPileNum = Column(Integer, default=3)  # 慢充电桩数
     ChargingQueueLen = Column(Integer)  # 充电桩排队队列长度
@@ -43,19 +42,31 @@ class Charger(Base):
 
     start_time = Column(Integer, default=0)  # 充电桩的启动时间
 
-class Charge_list(Base):
-     __tablename__ = 'charge_list'
-     id = Column(String(20), primary_key=True)
-     charge_list = Column(list)
-     
+
+class ChargeArea(Base):
+    # 表的名字:
+    __tablename__ = 'charge_area'  
+    # 表的结构:
+    pile_id = Column(String(20))  # 充电桩号
+    request_id = Column(String(20))
+
+
+class ChargeWaitArea(Base):
+    # 表的名字:
+    __tablename__ = 'charge_wait_area'  
+    # 表的结构:
+    type = Column(String(20))  # F/T
+    request_id = Column(String(20))
+    WaitingAreaSize = Column(Integer)  # 等候区车位容量
+
+
 class WaitArea(Base):
     # 表的名字:
     __tablename__ = 'wait_area'
 
     # 表的结构:
     type = Column(String(20))  # F/T
-    charge_wait_list = Column(list)  # 充电区的等候区
-    wait_list = Column(list)  # 等候区
+    request_id = Column(String(20))
     WaitingAreaSize = Column(Integer)  # 等候区车位容量
 
 
