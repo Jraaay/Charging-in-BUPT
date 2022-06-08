@@ -105,11 +105,8 @@ async def submit_charging_request(request):
         # 插入对应队列
         if session.query(WaitQueue).filter(WaitQueue.statue == 1).count() < CONFIG['cfg']['N']:
             # WaitArea 等候区队列处理
-            wait_area = session.query(WaitArea).filter(WaitArea.type == charge_mode).first()
-            wait_area.wait_list.append(request_id)
-            session.query(WaitArea).filter(WaitArea.type == charge_mode).update({
-                "wait_list": wait_area.wait_list
-            })
+            session.add(WaitArea(request_id=request_id),type=charge_mode)
+            session.commit()
 
             if charge_mode == "F":
                 charge_time = require_amount / CONFIG['cfg']['F_power'] * 60
@@ -177,9 +174,9 @@ async def edit_charging_request(request):
         charge_id = record.charge_id
         if record.charge_mode != charge_mode:
             # WaitArea 等候区相关处理
-            wait_area = session.query(WaitArea).filter(WaitArea.type == record.charge_mode).first()
-            wait_area.wait_list.remove(record.id)
-            wait_area.wait_list.append(record.id)
+            session.query(WaitArea).filter(WaitArea.type == record.charge_mode and WaitArea.request_id == record.id).delete()
+            session.add(WaitArea(request_id=record.id, type=record.charge_mode))
+            session.commit()
 
             res = session.query(func.max(int(WaitQueue.charge_id[1:]))).filter(WaitQueue.type == charge_mode).first()
             charge_id = charge_mode + str(res[0] + 1)
