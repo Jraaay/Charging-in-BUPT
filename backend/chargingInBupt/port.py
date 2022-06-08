@@ -9,6 +9,7 @@ from chargingInBupt.orm import User, session, ChargeRequest, WaitQueue, Charger,
 from chargingInBupt.json_validate import json_validate
 from chargingInBupt.json_schema import *
 from chargingInBupt.config import CONFIG
+from chargingInBupt.schedule import schedule
 from sqlalchemy import func
 
 app = Sanic("Charging_in_BUPT")
@@ -443,11 +444,35 @@ async def preview_queue(request):
 @authorized_admin()
 async def query_report(request):
     # TODO(3): 处理，获取充电站的数据报表列表
+    timer = Timer()
     # 读取数据库
+    charger_list = session.query(Charger).all()
     # 用报表计算结果
     success = None
     error_msg = None
     report_list = None
+    if charger_list is None:
+        success = False
+        error_msg = "没有充电桩"
+    else:
+        success = True
+        report_list = []
+        for charger in charger_list:
+            pass_seconds_from_start = timer.get_cur_timestamp() - charger.start_time
+            charger_fee = session.query(ChargeRecord.id, func.sum(ChargeRecord.charging_cost).label("t_charging_cost"), func.sum(ChargeRecord.service_cost).label("t_service_cost"), func.sum(ChargeRecord.total_cost).label("t_total_cost")).filter(ChargeRecord.id == charger.id).first()
+            report_list.append({
+                "day": pass_seconds_from_start % 86400,
+                "week": pass_seconds_from_start % 604800,
+                "year": pass_seconds_from_start % 31536000,
+                "pile_id": charger.id,
+                "cumulative_usage_times": charger.cumulative_usage_times,
+                "cumulative_charging_time": charger.cumulative_charging_time,
+                "cumulative_charging_amount": charger.cumulative_charging_amount,
+                "cumulative_charging_earning": charger_fee.t_charging_cost,
+                "cumulative_service_earning": charger_fee.t_service_cost,
+                "cumulative_earning": charger_fee.t_total_cost
+            })
+
     if success:
         return json({
             "code": 0,
@@ -510,14 +535,14 @@ async def query_queue(request):
         error_msg = "没有正在排队的用户"
     else:
         success = True
-        queue_list=[]
+        queue_list = []
         for user in user_in_queue:
             waiting_time = timer.get_cur_timestamp() - user.request_submit_time
             queue_list.append({
                 "pile_id": user.charge_pile_id,
                 "username": user.username,
-                "battery_size": user.battery_size,
-                "require_amount": user.require_amount,
+                "battery_size": '{:.2f}'.format(user.battery_size),
+                "require_amount": '{:.2f}'.format(user.require_amount),
                 "waiting_time": waiting_time
             })
 
@@ -540,11 +565,25 @@ async def query_queue(request):
 async def update_pile(request):
     pile_id = request.json.get('pile_id')
     status = request.json.get('status')
-    # TODO(3): 处理，更新充电桩状态
-    # 写数据库
-    # 触发调度
     success = None
     error_msg = None
+    # TODO(3): 处理，更新充电桩状态
+    # 写数据库
+    charger = session.query(Charger).filter(Charger.id == pile_id).first()
+    if charger is None:
+        success = False
+        error_msg = "充电桩不存在"
+    else:
+        success = True
+        if charger.charger_status != status:
+            if status == 'MAINTAINING':
+                timer = Timer()
+                session.query(Charger).filter(Charger.id == pile_id).update({"charger_status": status, "start_time": timer.get_cur_timestamp()})
+            else:
+                session.query(Charger).filter(Charger.id == pile_id).update({"charger_status": status})
+    # 触发调度
+    # schedule(type, id)
+
     if success:
         return json({
             "code": 0,

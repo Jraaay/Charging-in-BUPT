@@ -41,6 +41,8 @@ class Charger(Base):
     cumulative_charging_time = Column(Integer, default=0)  # 充电桩累计充电时间
     cumulative_charging_amount = Column(String, default="0")  # 充电桩累计充电电量
 
+    start_time = Column(Integer, default=0)  # 充电桩的启动时间
+
 
 class WaitArea(Base):
     # 表的名字:
