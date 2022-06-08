@@ -1,3 +1,5 @@
+from tkinter.tix import Tree
+from sympy import true
 from backend.chargingInBupt.orm import WaitArea
 from chargingInBupt.orm import ChargeRecord, ChargeRequest, Charger, ChargeArea, ChargeWaitArea, WaitArea
 from requests import session
@@ -6,13 +8,14 @@ import Timer
 
 def schedule(schedule_type,request_id):
     charge_mode = session.query(ChargeRequest.charge_mode).filter(ChargeRequest.id == request_id)
-    
+    pile_id = session.query(ChargeRequest.charge_pile_id).filter(ChargeRequest.id == request_id)
+    charge_list = session.query(ChargeArea.request_id).filter(ChargeArea.pile_id == pile_id)
+    charge_wait_list = session.query(ChargeWaitArea.request_id).filter(ChargeWaitArea.type == charge_mode)
+    wait_list = session.query(WaitArea.request_id).filter(WaitArea.type == charge_mode)
+     
     if schedule_type is 1:  #有人完成充电 或者是取消充电
         charge_done = session.query(ChargeRequest).filter(ChargeRequest.id == request_id)
-        pile_id = session.query(ChargeRequest.charge_pile_id).filter(ChargeRequest.id == request_id)
-        charge_list = session.query(ChargeArea.request_id).filter(ChargeArea.pile_id == pile_id)
-        charge_wait_list = session.query(ChargeWaitArea.request_id).filter(ChargeWaitArea.type == charge_mode)
-        wait_list = session.query(WaitArea.request_id).filter(WaitArea.type == charge_mode)
+        
         #让该充电桩第二辆车充电
         charge_list.pop(0)
         #检查充电区的等候区、等候区，有则叫号进入充电区
@@ -109,3 +112,67 @@ def schedule(schedule_type,request_id):
                 "state" : 2  #充电区等待
             })        
         
+
+    elif schedule_type is 3:#充电桩开启
+        scheduling = True
+        for charger_tmp in session.query(Charger).filter(Charger.type == type and Charger.charger_status=="MAINTAINING"):
+                now_queue_len = session.query(ChargeArea.request_id).filter(ChargeArea.pile_id == charger_tmp.pile_id).count()
+                if now_queue_len > 0 : #有车辆排队
+                    tmp_list = session.query(ChargeArea.request_id).filter(ChargeArea.pile_id == charger_tmp.pile_id)
+                    charge_wait_list.append(tmp_list)#重新排队
+        charge_wait_list.sort()
+        #后面应该接schedul(2)即可
+        while(len(charge_wait_list)>0):
+            for charger_tmp in session.query(Charger).filter(Charger.type==type and Charger.charger_status=="MAINTAINING"):
+                if(len(charger_tmp.chargelist) < M):
+                    request_id = charge_wait_list[0]
+                    schedule(2,request_id)#里面会pop直至charge_wait_list调度完
+            scheduling = False
+            
+          
+
+                    
+
+    elif schedule_type is 4:#充电桩故障或关闭
+        #为当前充电的车辆记录时间戳
+        charge_done = session.query(ChargeRequest).filter(ChargeRequest.id == request_id)
+        timer = Timer()
+        session.query(ChargeRecord).filter(ChargeRecord.id == charge_done.id).update({
+            "end_time" : timer.get_cur_format_time()
+        })
+        session.query(Charger).filter(Charger.id == charge_done.charge_pile_id).update({
+            "cumulative_usage_times" : session.query(Charger.cumulative_usage_times).filter(Charger.id == charge_done.charge_pile_id) + 1 ,
+            "cumulative_charging_time" : session.query(Charger.cumulative_charging_time).filter(Charger.id == charge_done.charge_pile_id) \
+                + charge_done.charge_time ,
+            "cumulative_charging_amount" : str(float(session.query(Charger.cumulative_charging_amount).filter(Charger.id == charge_done.charge_pile_id)) \
+                + charge_done.require_amount )
+        })
+        session.query(ChargeRequest).filter(ChargeRequest.id == charge_done.id).update({
+            "state" : 0  #不在充电
+        })
+
+        #进行调度
+        for charger_tmp in session.query(Charger).filter(Charger.type == type  and Charger.charger_status=="MAINTAINING"):
+                now_queue_len = session.query(ChargeArea.request_id).filter(ChargeArea.pile_id == charger_tmp.pile_id).count()
+                if now_queue_len < M :  #同类型充电桩有空位
+                    charge_wait_list.append(charge_list)#优先调度
+                    break
+        charge_list.clear()
+        charge_wait_list.sort()#时间调度
+        #更新等待队列
+        session.query(ChargeArea).filter(ChargeArea.pile_id == pile_id).update({
+            "request_id" : charge_list
+            })
+        session.qurey(ChargeWaitArea).filterfilter(ChargeWaitArea.type == charge_mode).update({
+            "ChargeWaitArea.request_id" : charge_wait_list
+            })
+
+        while(len(charge_wait_list)>0):
+            for charger_tmp in session.query(Charger).filter(Charger.type==type and Charger.charger_status=="MAINTAINING"):
+                if(len(charger_tmp.chargelist) < M):
+                    request_id = charge_wait_list[0]
+                    schedule(2,request_id)#里面会pop直至charge_wait_list调度完
+                
+
+                
+
