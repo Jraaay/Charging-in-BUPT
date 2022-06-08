@@ -127,9 +127,12 @@ async def submit_charging_request(request):
             session.add(WaitQueue(type=charge_mode, state=1, charge_id=charge_id))
             session.commit()
             # 生成充电请求，插入数据库
+            timer = Timer()
+            submit_time = timer.get_cur_timestamp()
             charge_request = ChargeRequest(id=request_id, state=1, user_id=user.id, charge_mode=charge_mode,
                                            require_amount=float(require_amount), charge_time=charge_time,
-                                           battery_size=float(battery_size), charge_id=charge_id)
+                                           battery_size=float(battery_size), charge_id=charge_id,
+                                           request_submit_time=submit_time)
             session.add(charge_request)
             session.commit()
             success = True
