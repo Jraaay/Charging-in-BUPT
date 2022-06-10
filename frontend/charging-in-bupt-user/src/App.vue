@@ -201,16 +201,20 @@
     center
   >
     <span>
-      <el-form :model="reqChargeForm" label-width="120px" label-position="top">
+      <el-form
+        :model="reqChangeChargeForm"
+        label-width="120px"
+        label-position="top"
+      >
         <el-form-item label="充电模式">
-          <el-radio-group v-model="reqChargeForm.charge_mode">
+          <el-radio-group v-model="reqChangeChargeForm.charge_mode">
             <el-radio-button label="快充" />
             <el-radio-button label="慢充" />
           </el-radio-group>
         </el-form-item>
         <el-form-item label="请求充电量">
           <el-input-number
-            v-model="reqChargeForm.require_amount"
+            v-model="reqChangeChargeForm.require_amount"
             :min="1"
           />（单位：Wh）
         </el-form-item>
@@ -323,7 +327,7 @@ export default {
       });
       setTimeout(() => {
         axios
-          .get("/user/preview_queue", {
+          .get("/api/user/preview_queue", {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -365,7 +369,11 @@ export default {
         handler: () => {
           this.buttonLoading[0] = true;
           axios
-            .get("/user/query_order_detail")
+            .get("/api/user/query_order_detail", {
+              headers: {
+                Authorization: `Bearer ${this.token}`,
+              },
+            })
             .then((res) => {
               if (res.data.code === 0) {
                 this.buttonLoading[0] = false;
@@ -401,10 +409,15 @@ export default {
         handler: () => {
           this.buttonLoading[2] = true;
           axios
-            .get("/user/end_charging_request")
+            .get("/api/user/end_charging_request", {
+              headers: {
+                Authorization: `Bearer ${this.token}`,
+              },
+            })
             .then((res) => {
               if (res.data.code === 0) {
                 ElMessage.success("取消成功");
+                this.refreshState();
               } else {
                 ElMessage.error(res.data.message);
               }
@@ -422,10 +435,15 @@ export default {
         handler: () => {
           this.buttonLoading[3] = true;
           axios
-            .get("/user/end_charging_request")
+            .get("/api/user/end_charging_request", {
+              headers: {
+                Authorization: `Bearer ${this.token}`,
+              },
+            })
             .then((res) => {
               if (res.data.code === 0) {
                 ElMessage.success("完成充电");
+                this.refreshState();
               } else {
                 ElMessage.error(res.data.message);
               }
@@ -447,6 +465,11 @@ export default {
     ];
     const operations = [0, 1, 2, 4].map((i) => allOpt[i]);
     return {
+      timeConfig: {
+        startTime: null,
+        timeSpeed: null,
+        startRealTime: null,
+      },
       timer1: null,
       timer2: null,
       nowCharging: false,
@@ -551,7 +574,7 @@ export default {
         background: "rgba(255, 255, 255, 1)",
       });
       axios
-        .post("/login", {
+        .post("/api/login", {
           username: this.loginForm.username,
           password: this.loginForm.password,
         })
@@ -559,7 +582,7 @@ export default {
           if (res.data.code === 0) {
             const token = res.data.data.token;
             axios
-              .get("/user/preview_queue", {
+              .get("/api/user/preview_queue", {
                 headers: {
                   Authorization: `Bearer ${token}`,
                 },
@@ -599,7 +622,7 @@ export default {
     },
     register() {
       axios
-        .post("/user/register", {
+        .post("/api/user/register", {
           username: this.loginForm.username,
           password: this.loginForm.password,
           re_password: this.loginForm.passwordAgain,
@@ -636,20 +659,33 @@ export default {
     reqChargeFunc() {
       this.chargeReqLoading = true;
       axios
-        .post("/user/submit_charging_request", {
-          charge_mode: this.reqChargeForm.charge_mode,
-          require_amount: this.reqChargeForm.require_amount,
-          battery_size: this.reqChargeForm.battery_size,
-        })
+        .post(
+          "/api/user/submit_charging_request",
+          {
+            charge_mode: this.reqChargeForm.charge_mode == "快充" ? "F" : "T",
+            require_amount: this.reqChargeForm.require_amount.toString(),
+            battery_size: this.reqChargeForm.battery_size.toString(),
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${this.token}`,
+            },
+          }
+        )
         .then((res) => {
           if (res.data.code === 0) {
             ElMessage.success("请求充电成功");
             this.chargeReqLoading = false;
             this.reqChargeDialog = false;
+            this.refreshState();
           } else {
             ElMessage.error(res.data.message);
             this.chargeReqLoading = false;
           }
+        })
+        .catch((err) => {
+          ElMessage.error(err);
+          this.chargeReqLoading = false;
         });
     },
     reqChangeChargeDialogFunc() {
@@ -663,15 +699,25 @@ export default {
     reqChangeChargeFunc() {
       this.chargeReqLoading = true;
       axios
-        .post("/user/edit_charging_request", {
-          charge_mode: this.reqChangeChargeForm.charge_mode,
-          require_amount: this.reqChangeChargeForm.require_amount,
-        })
+        .post(
+          "/api/user/edit_charging_request",
+          {
+            charge_mode:
+              this.reqChangeChargeForm.charge_mode == "快充" ? "F" : "T",
+            require_amount: this.reqChangeChargeForm.require_amount.toString(),
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${this.token}`,
+            },
+          }
+        )
         .then((res) => {
           if (res.data.code === 0) {
             ElMessage.success("修改充电请求成功");
             this.chargeReqLoading = false;
             this.reqChangeChargeDialog = false;
+            this.refreshState();
           } else {
             ElMessage.error(res.data.message);
             this.chargeReqLoading = false;
@@ -685,9 +731,9 @@ export default {
       if (this.timer2) {
         clearInterval(this.timer2);
       }
-      // this.timer1 = setInterval(() => {
-      //   this.refreshState();
-      // }, 20000);
+      this.timer1 = setInterval(() => {
+        this.refreshState();
+      }, 1000);
       this.timer2 = setInterval(() => {
         this.refreshTime();
       }, 1000);
@@ -704,7 +750,7 @@ export default {
       const token = this.token;
       if (token) {
         axios
-          .get("/user/preview_queue", {
+          .get("/api/user/preview_queue", {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -723,7 +769,6 @@ export default {
               this.remainCarNum = res.data.data.queue_len;
               this.curStateId = stateMap[res.data.data.cur_state];
               this.place = res.data.data.place;
-              ElMessage.success("刷新成功");
             } else {
               ElMessage.error(res.data.message);
             }
@@ -735,10 +780,25 @@ export default {
     },
     refreshTime() {
       axios
-        .get("/time")
+        .get("/api/time")
         .then((res) => {
           if (res.data.code === 0) {
             this.curTime = res.data.data.datetime;
+            console.log(this);
+            if (res.data.data.speed != null) {
+              this.timeConfig.timeSpeed = res.data.data.speed;
+              this.timeConfig.startTime = res.data.data.timestamp;
+              this.timeConfig.startRealTime = new Date().getTime() / 1000
+              clearInterval(this.timer2);
+              this.timer2 = setInterval(() => {
+                const dur =
+                  new Date().getTime() / 1000 - this.timeConfig.startRealTime;
+                console.log(new Date().getTime() / 1000, this.timeConfig.startRealTime, dur);
+                const curTime =
+                  this.timeConfig.timeSpeed * dur + this.timeConfig.startTime;
+                this.curTime = new Date(curTime * 1000).toLocaleString();
+              }, 10);
+            }
           } else {
             ElMessage.error(res.data.message);
           }

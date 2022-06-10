@@ -433,7 +433,7 @@ export default {
         background: "rgba(255, 255, 255, 1)",
       });
       axios
-        .post("/login", {
+        .post("/api/login", {
           username: this.loginForm.username,
           password: this.loginForm.password,
         })
@@ -476,7 +476,11 @@ export default {
     checkCharger() {
       this.checkChargerButtonLoading = true;
       axios
-        .get("/admin/query_all_piles_stat")
+        .get("/api/admin/query_all_piles_stat", {
+          headers: {
+            Authorization: "Bearer " + this.token,
+          },
+        })
         .then((res) => {
           if (res.data.code === 0) {
             this.piles_stat = res.data.data;
@@ -496,19 +500,25 @@ export default {
     },
     showReportFunc() {
       this.showReportButtonLoading = true;
-      axios.get("/admin/query_report").then((res) => {
-        if (res.data.code === 0) {
-          const data = res.data.data;
-          this.reportsRaw = data;
-          this.reports = [];
+      axios
+        .get("/api/admin/query_report", {
+          headers: {
+            Authorization: "Bearer " + this.token,
+          },
+        })
+        .then((res) => {
+          if (res.data.code === 0) {
+            const data = res.data.data;
+            this.reportsRaw = data;
+            this.reports = [];
 
-          this.showReport = true;
-          console.log(this.reports);
-        } else {
-          ElMessage.error(res.data.message);
-        }
-        this.showReportButtonLoading = false;
-      });
+            this.showReport = true;
+            console.log(this.reports);
+          } else {
+            ElMessage.error(res.data.message);
+          }
+          this.showReportButtonLoading = false;
+        });
       // .catch((err) => {
       //   ElMessage.error(err);
       //   this.showReportButtonLoading = false;
@@ -523,10 +533,18 @@ export default {
         status == "RUNNING" ? 0 : status == "SHUTDOWN" ? 1 : 2
       ] = true;
       axios
-        .post("/admin/update_pile", {
-          charger_id: this.changeChargerId,
-          status: status,
-        })
+        .post(
+          "/api/admin/update_pile",
+          {
+            pile_id: this.changeChargerId,
+            status: status,
+          },
+          {
+            headers: {
+              Authorization: "Bearer " + this.token,
+            },
+          }
+        )
         .then((res) => {
           if (res.data.code === 0) {
             ElMessage.success("修改成功");
@@ -553,7 +571,11 @@ export default {
     showQueueFunc() {
       this.showQueueButtonLoading = true;
       axios
-        .get("/admin/query_queue")
+        .get("/api/admin/query_queue", {
+          headers: {
+            Authorization: "Bearer " + this.token,
+          },
+        })
         .then((res) => {
           if (res.data.code === 0) {
             const data = res.data.data;

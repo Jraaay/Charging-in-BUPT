@@ -18,8 +18,8 @@ def authorized():
         async def decorated_function(request, *args, **kwargs):
             is_authorized = False
 
-            token = request.headers.get('Authorization').split(' ')[1]
             try:
+                token = request.headers.get('Authorization').split(' ')[1]
                 payload = jwt.decode(
                     token, CONFIG['JWT']['secret'], algorithms=['HS256'])
                 is_authorized = True
@@ -66,6 +66,6 @@ def get_username(request):
     try:
         payload = jwt.decode(
             token, CONFIG['JWT']['secret'], algorithms=['HS256'])
-        return payload['name']
+        return payload['username']
     except jwt.InvalidTokenError:
         return ""

@@ -3,3 +3,4 @@ pyjwt==2.4.0
 sqlalchemy==1.4.36
 mysql-connector==2.2.9
 jsonschema==4.5.1
+requests==2.28.0

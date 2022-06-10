@@ -19,8 +19,8 @@ submit_charging_request_json_schema = {
     "type": "object",
     "properties": {
         "charge_mode": {"type": "string"},
-        "require_amount": {"type": "number"},
-        "battery_size": {"type": "number"}
+        "require_amount": {"type": "string"},
+        "battery_size": {"type": "string"}
     },
 }
 
@@ -28,7 +28,7 @@ edit_charging_request_json_schema = {
     "type": "object",
     "properties": {
         "charge_mode": {"type": "string"},
-        "require_amount": {"type": "number"}
+        "require_amount": {"type": "string"}
     },
 }
 
