@@ -577,8 +577,7 @@ async def query_all_piles_stat(request):
 async def query_queue(request):
     # TODO(3): 处理，获取目前所有正在排队的用户
     # 读取数据库
-    user_in_queue = session.query(ChargeRequest).filter(ChargeRequest.state in [
-        1, 2]).join(User, ChargeRequest.user_id == User.id).all()
+    user_in_queue = session.query(ChargeRequest).filter(ChargeRequest.state != 0).join(User, ChargeRequest.user_id == User.id).all()
     timer = Timer()
 
     success = None
@@ -594,7 +593,7 @@ async def query_queue(request):
             waiting_time = timer.get_cur_timestamp() - user.request_submit_time
             queue_list.append({
                 "pile_id": user.charge_pile_id,
-                "username": user.username,
+                "username": session.query(User.username).filter(User.id == user.user_id).first()[0],
                 "battery_size": '{:.2f}'.format(user.battery_size),
                 "require_amount": '{:.2f}'.format(user.require_amount),
                 "waiting_time": waiting_time
