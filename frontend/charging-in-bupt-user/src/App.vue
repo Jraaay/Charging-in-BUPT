@@ -769,6 +769,13 @@ export default {
               this.remainCarNum = res.data.data.queue_len;
               this.curStateId = stateMap[res.data.data.cur_state];
               this.place = res.data.data.place;
+              if (this.curStateId == 2) {
+                this.curStep = `进入${this.place}号充电桩并等候`;
+              } else if (this.curStateId == 3) {
+                this.curStep = `在${this.place}号充电桩进行充电`;
+              } else if (this.curStateId == 5) {
+                this.curStep = `由于充电桩故障，请进入${this.place}号充电桩并等候`;
+              }
             } else {
               ElMessage.error(res.data.message);
             }
@@ -788,12 +795,16 @@ export default {
             if (res.data.data.speed != null) {
               this.timeConfig.timeSpeed = res.data.data.speed;
               this.timeConfig.startTime = res.data.data.timestamp;
-              this.timeConfig.startRealTime = new Date().getTime() / 1000
+              this.timeConfig.startRealTime = new Date().getTime() / 1000;
               clearInterval(this.timer2);
               this.timer2 = setInterval(() => {
                 const dur =
                   new Date().getTime() / 1000 - this.timeConfig.startRealTime;
-                console.log(new Date().getTime() / 1000, this.timeConfig.startRealTime, dur);
+                console.log(
+                  new Date().getTime() / 1000,
+                  this.timeConfig.startRealTime,
+                  dur
+                );
                 const curTime =
                   this.timeConfig.timeSpeed * dur + this.timeConfig.startTime;
                 this.curTime = new Date(curTime * 1000).toLocaleString();
@@ -830,7 +841,12 @@ export default {
           `进入${this.place}号充电桩并等候`,
           [0, 2, 4],
         ],
-        3: ["正在充电", "完成充电", "进行充电", [0, 3, 4]],
+        3: [
+          "正在充电",
+          "完成充电",
+          `在${this.place}号充电桩进行充电`,
+          [0, 3, 4],
+        ],
         4: [
           "正在等候区等候",
           "进入充电区等候",
