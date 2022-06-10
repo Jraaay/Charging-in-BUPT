@@ -5,7 +5,7 @@ from chargingInBupt.orm import session
 from chargingInBupt.Timer import Timer
 
 
-def schedule(schedule_type, request_id, type = None):
+def schedule(schedule_type, request_id, type=None, err_charger_id=None, must_sch=False, error=False):
 
     if schedule_type is 1:  # 有人完成充电 或者是取消充电
         charge_mode = session.query(ChargeRequest.charge_mode).filter(
@@ -64,6 +64,8 @@ def schedule(schedule_type, request_id, type = None):
                 WaitArea.request_id == request_id).delete()
             session.query(WaitQueue).filter(WaitQueue.charge_id == session.query(ChargeRequest.charge_id).filter(
                 ChargeRequest.id == request_id).first()[0]).delete()
+            session.query(ChargeWaitArea).filter(
+                ChargeWaitArea.request_id == request_id).delete()
             if request_id == charge_list[0]:
                 session.query(ChargeRequest).filter(ChargeRequest.id == request_id).update({
                     "state": 3  # 正在充电
@@ -75,11 +77,12 @@ def schedule(schedule_type, request_id, type = None):
                 session.query(ChargeRequest).filter(ChargeRequest.id == request_id).update({
                     "state": 2  # 充电区等待
                 })
-        
+
         first_req_id = charge_list[0] if len(charge_list) > 0 else None
 
         if first_req_id is not None:
-            req = session.query(ChargeRequest).filter(ChargeRequest.id == first_req_id[0]).first()
+            req = session.query(ChargeRequest).filter(
+                ChargeRequest.id == first_req_id[0]).first()
             if req.state == 1 or req.state == 2 or req.state == 4 or req.state == 5:
                 session.query(ChargeRequest).filter(ChargeRequest.id == first_req_id[0]).update({
                     "state": 3  # 正在充电
@@ -93,7 +96,7 @@ def schedule(schedule_type, request_id, type = None):
     elif schedule_type is 2:  # 充电区队没满时，来了一辆车
         cur_state = session.query(ChargeRequest.state).filter(
             ChargeRequest.id == request_id).first()[0]
-        if cur_state == 3:
+        if cur_state == 3 and not must_sch:
             return
         charge_mode = session.query(ChargeRequest.charge_mode).filter(
             ChargeRequest.id == request_id).first()[0]
@@ -105,7 +108,7 @@ def schedule(schedule_type, request_id, type = None):
             ChargeWaitArea.type == charge_mode).all()
         wait_list = session.query(WaitArea.request_id).filter(
             WaitArea.type == charge_mode).all()
-        
+
         # 加入最快的队列-获取pile_id : 读队伍末尾车辆的结束时间
         endtime_list = []
         their_pile_id = []  # 与endtime_list的充电桩一一对应
@@ -115,7 +118,8 @@ def schedule(schedule_type, request_id, type = None):
             for charger_tmp in session.query(Charger).filter(and_(Charger.type == "F", Charger.charger_status == "RUNNING")):
                 now_queue_len = session.query(ChargeArea.request_id).filter(
                     ChargeArea.pile_id == charger_tmp.id).count()
-                M = session.query(Charger.ChargingQueueLen).filter(Charger.id == charger_tmp.id).first()[0]  # 充电桩排队队列长度
+                M = session.query(Charger.ChargingQueueLen).filter(
+                    Charger.id == charger_tmp.id).first()[0]  # 充电桩排队队列长度
                 if now_queue_len < M:  # 该充电区有空位
                     endtime_list.append(charger_tmp.last_end_time)
                     their_pile_id.append(charger_tmp.id)
@@ -123,13 +127,21 @@ def schedule(schedule_type, request_id, type = None):
             for charger_tmp in session.query(Charger).filter(and_(Charger.type == "T", Charger.charger_status == "RUNNING")):
                 now_queue_len = session.query(ChargeArea.request_id).filter(
                     ChargeArea.pile_id == charger_tmp.id).count()
-                M = session.query(Charger.ChargingQueueLen).filter(Charger.id == charger_tmp.id).first()[0]  # 充电桩排队队列长度
+                M = session.query(Charger.ChargingQueueLen).filter(
+                    Charger.id == charger_tmp.id).first()[0]  # 充电桩排队队列长度
                 if now_queue_len < M:  # 该充电区有空位
                     endtime_list.append(charger_tmp.last_end_time)
                     their_pile_id.append(charger_tmp.id)
 
         if endtime_list == []:
-            return
+            if not error:
+                return
+            else:
+                session.query(ChargeRequest).filter(ChargeRequest.id == request_id).update({
+                    "state": 5
+                })
+                session.commit()
+                return
 
         # 返回充电完成最快的充电桩编号
         pile_id = their_pile_id[endtime_list.index(min(endtime_list))]
@@ -146,20 +158,24 @@ def schedule(schedule_type, request_id, type = None):
             session.query(ChargeRequest.charge_time).filter(
                 ChargeRequest.id == request_id).first()[0]
         })
-        if cur_state == 1 or cur_state == 4:
+        if session.query(ChargeArea).filter(ChargeArea.request_id == request_id).count() == 0:
             session.add(ChargeArea(pile_id=pile_id, request_id=request_id))
-            session.query(WaitArea).filter(
-                WaitArea.request_id == request_id).delete()
-            session.query(WaitQueue).filter(WaitQueue.charge_id == session.query(ChargeRequest.charge_id).filter(
-                ChargeRequest.id == request_id).first()[0]).delete()
         else:
             session.query(ChargeArea).filter(ChargeArea.request_id == request_id).update({
                 "pile_id": pile_id
             })
+        session.query(WaitArea).filter(
+            WaitArea.request_id == request_id).delete()
+        session.query(WaitQueue).filter(WaitQueue.charge_id == session.query(ChargeRequest.charge_id).filter(
+            ChargeRequest.id == request_id).first()[0]).delete()
+        session.query(ChargeWaitArea).filter(
+            ChargeWaitArea.request_id == request_id).delete()
 
         charge_list = session.query(ChargeArea.request_id).filter(
             ChargeArea.pile_id == pile_id).all()
-        if str(request_id) == charge_list[0][0]:  # 直接到了队首，直接充电
+        # 直接到了队首，直接充电
+        if str(request_id) == charge_list[0][0] and session.query(ChargeRequest).filter(
+                and_(ChargeRequest.charge_pile_id == pile_id, ChargeRequest.state == 3)).first() is None:
             session.query(ChargeRequest).filter(ChargeRequest.id == request_id).update({
                 "state": 3  # 正在充电
             })
@@ -168,7 +184,7 @@ def schedule(schedule_type, request_id, type = None):
             })
         else:
             session.query(ChargeRequest).filter(ChargeRequest.id == request_id).update({
-                "state": 2  # 充电区等待
+                "state": 2 if not error else 5  # 充电区等待
             })
 
         session.commit()
@@ -176,6 +192,7 @@ def schedule(schedule_type, request_id, type = None):
     elif schedule_type is 3:  # 充电桩开启
         charge_wait_list = session.query(ChargeWaitArea.request_id).filter(
             ChargeWaitArea.type == type).all()
+        charge_wait_list = [i[0] for i in charge_wait_list]
         scheduling = True
         for charger_tmp in session.query(Charger).filter(and_(Charger.type == type, Charger.charger_status == "RUNNING")):
             now_queue_len = session.query(ChargeArea.request_id).filter(
@@ -187,11 +204,6 @@ def schedule(schedule_type, request_id, type = None):
         charge_wait_list.sort()
         # 后面应该接schedul(2)即可
         while(len(charge_wait_list) > 0):
-            # for charger_tmp in session.query(Charger).filter(and_(Charger.type == type, Charger.charger_status == "RUNNING")):
-            #     now_queue_len = session.query(ChargeArea.request_id).filter(
-            #         ChargeArea.pile_id == charger_tmp.id).count()
-            #     M = session.query(Charger.ChargingQueueLen).filter(Charger.id == charger_tmp.id).first()[0]  # 充电桩排队队列长度
-            #     if(now_queue_len < M):
             request_id = charge_wait_list[0]
             schedule(2, request_id)  # 里面会pop直至charge_wait_list调度完
             charge_wait_list.pop(0)
@@ -205,46 +217,23 @@ def schedule(schedule_type, request_id, type = None):
     elif schedule_type is 4:  # 充电桩故障或关闭
         # 为当前充电的车辆记录时间戳
         charge_done = session.query(ChargeRequest).filter(
-            ChargeRequest.id == request_id)
-        timer = Timer()
-        session.query(ChargeRecord).filter(ChargeRecord.id == charge_done.id).update({
-            "end_time": timer.get_cur_format_time()
-        })
-        session.query(Charger).filter(Charger.id == charge_done.charge_pile_id).update({
-            "cumulative_usage_times": session.query(Charger.cumulative_usage_times).filter(Charger.id == charge_done.charge_pile_id) + 1,
-            "cumulative_charging_time": session.query(Charger.cumulative_charging_time).filter(Charger.id == charge_done.charge_pile_id)
-            + charge_done.charge_time,
-            "cumulative_charging_amount": str(float(session.query(Charger.cumulative_charging_amount).filter(Charger.id == charge_done.charge_pile_id))
-                                              + charge_done.require_amount)
-        })
-        session.query(ChargeRequest).filter(ChargeRequest.id == charge_done.id).update({
-            "state": 0  # 不在充电
-        })
+            and_(ChargeRequest.charge_pile_id == err_charger_id, ChargeRequest.state == 2)).all() + session.query(ChargeRequest).filter(
+            and_(ChargeRequest.charge_pile_id == err_charger_id, ChargeRequest.state == 3)).all() + session.query(ChargeRequest).filter(
+            and_(ChargeRequest.charge_pile_id == err_charger_id, ChargeRequest.state == 5)).all()
+        if charge_done is None or len(charge_done) == 0:
+            return
 
-        # 进行调度
-        for charger_tmp in session.query(Charger).filter(and_(Charger.type == type, Charger.charger_status == "RUNNING")):
-            now_queue_len = session.query(ChargeArea.request_id).filter(
-                ChargeArea.pile_id == charger_tmp.id).count()
-            M = session.query(Charger.ChargingQueueLen).filter(Charger.id == charger_tmp.id).first()[0]  # 充电桩排队队列长度
-            if now_queue_len < M:  # 同类型充电桩有空位
-                charge_wait_list.append(charge_list)  # 优先调度
-                break
-        charge_list.clear()
-        charge_wait_list.sort()  # 时间调度
-        # 更新等待队列
-        session.query(ChargeArea).filter(ChargeArea.pile_id == pile_id).update({
-            "request_id": charge_list
-        })
-        session.query(ChargeWaitArea).filterfilter(ChargeWaitArea.type == charge_mode).update({
-            "ChargeWaitArea.request_id": charge_wait_list
-        })
+        for charge_done_tmp in charge_done:
+            session.add(ChargeWaitArea(
+                request_id=charge_done_tmp.id, type=charge_done_tmp.charge_mode))
+            session.query(ChargeArea).filter(
+                ChargeArea.request_id == charge_done_tmp.id).delete()
 
-        while(len(charge_wait_list) > 0):
-            for charger_tmp in session.query(Charger).filter(and_(Charger.type == type, Charger.charger_status == "RUNNING")):
-                now_queue_len = session.query(ChargeArea.request_id).filter(
-                    ChargeArea.pile_id == charger_tmp.id).count()
-                M = session.query(Charger.ChargingQueueLen).filter(Charger.id == charger_tmp.id).first()[0]  # 充电桩排队队列长度
-                if(now_queue_len < M):
-                    request_id = charge_wait_list[0]
-                    schedule(2, request_id)  # 里面会pop直至charge_wait_list调度完
+        session.commit()
+
+        charge_wait_list = session.query(ChargeWaitArea.request_id).filter(
+            ChargeWaitArea.type == charge_done[0].charge_mode).all()
+
+        for request_id in charge_wait_list:
+            schedule(2, request_id[0], must_sch=True, error=True)
         session.commit()

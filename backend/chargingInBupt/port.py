@@ -111,9 +111,8 @@ async def submit_charging_request(request):
             if his_front_cars == 0:
                 charge_id = charge_mode + '1'
             else:
-                # ？不是很确定这样求最大值对不对
                 res_raw = session.query(ChargeRequest).filter(
-                    ChargeRequest.charge_mode == charge_mode).all()
+                    and_(ChargeRequest.charge_mode == charge_mode, ChargeRequest.state != 0)).all()
                 res = max([int(i.charge_id[1:]) for i in res_raw])
                 charge_id = charge_mode + str(res + 1)
 
@@ -197,10 +196,10 @@ async def edit_charging_request(request):
             if his_front_cars == 0:
                 charge_id = charge_mode + '1'
             else:
-                # ？不是很确定这样求最大值对不对
-                res = session.query(WaitQueue).filter(
-                    WaitQueue.type == charge_mode).order_by(WaitQueue.charge_id.desc()).first()
-                charge_id = charge_mode + str(int(res.charge_id[1:]) + 1)
+                res_raw = session.query(ChargeRequest).filter(
+                    ChargeRequest.charge_mode == charge_mode).all()
+                res = max([int(i.charge_id[1:]) for i in res_raw])
+                charge_id = charge_mode + str(res + 1)
             session.query(WaitQueue).filter(WaitQueue.charge_id == record.charge_id).update({
                 "charge_id": charge_id,
                 "type": charge_mode
@@ -435,17 +434,17 @@ async def preview_queue(request):
     # 若存在还未结束的充电请求
     if record is not None:
         charge_id = record.charge_id
-        info = ['', "WAITINGSTAGE1", "WAITINGSTAGE2", "CHARGING"]
+        info = ['NOTCHARGING ', "WAITINGSTAGE1", "WAITINGSTAGE2",
+                "CHARGING", 'CHANGEMODEREQUEUE', 'FAULTREQUEUE']
         cur_state = info[record.state]
         if record.state == 1:
             place = "WAITINGPLACE"
-        elif record.state in [2, 3]:
+        elif record.state in [2, 3, 5]:
             place = record.charge_pile_id
         else:
             place = None
         # 算前方车辆
-        if record.state == 1:
-            # 有问题
+        if record.state == 1 or record.state == 4:
             num_wait = session.query(WaitQueue).filter(
                 and_(WaitQueue.type == record.charge_mode, WaitQueue.charge_id < record.charge_id)).count()
             num_charge_wait = session.query(ChargeArea).count()
@@ -458,6 +457,8 @@ async def preview_queue(request):
                 and_(ChargeArea.pile_id == charge_pile.id, ChargeArea.request_id < record.id)).count()
         elif record.state == 3:
             queue_len = 0
+        elif record.state == 5:
+            queue_len = 1
         else:
             queue_len = None
     else:
@@ -642,6 +643,8 @@ async def update_pile(request):
         # 触发调度
         if change and status == 'RUNNING':
             schedule(3, None, charger.type)
+        elif change:
+            schedule(4, None, err_charger_id=pile_id)
 
     if success:
         return json({
