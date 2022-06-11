@@ -385,6 +385,10 @@ export default {
                   ElMessage.warning("暂无详单");
                   this.buttonLoading[0] = false;
                 } else {
+                  // sort this.order_list
+                  this.order_list.sort((a, b) => {
+                    return b.order_id - a.order_id;
+                  });
                   this.showDetail = true;
                 }
               } else {

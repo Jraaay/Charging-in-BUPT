@@ -270,7 +270,7 @@
         >
           <el-option
             v-for="item in reportsRaw"
-            :key="[item.day, item.pile_id]"
+            :key="'Day ' + item.day + ' Pile ' + item.pile_id"
             :label="'Day ' + item.day + ' Pile ' + item.pile_id"
             :value="'Day ' + item.day + ' Pile ' + item.pile_id"
           />
@@ -406,7 +406,6 @@ export default {
       showQueue: false,
       showSelectChargerStatus: false,
       changeChargerId: "",
-      reports: [],
       reportsRaw: [],
       queues: [],
       queuesRaw: [],
@@ -510,10 +509,8 @@ export default {
           if (res.data.code === 0) {
             const data = res.data.data;
             this.reportsRaw = data;
-            this.reports = [];
-
             this.showReport = true;
-            console.log(this.reports);
+            console.log(this.reportsRaw);
           } else {
             ElMessage.error(res.data.message);
           }
