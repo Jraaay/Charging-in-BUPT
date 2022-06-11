@@ -348,19 +348,19 @@ async def end_charging_request(request = None, _user = None):
                     end_time_zone = i + 1
                     break
             # 如果开始和结束的时间区域相同
+            begin_time_zone = begin_time_zone % len(clocks)
+            end_time_zone = end_time_zone % len(clocks)
             if begin_time_zone == end_time_zone:
                 charging_cost = float('%.2f' % (
                     charged_amount * fees[begin_time_zone - 1]))  # 充电费用
             else:
                 # 分别计算开始时间到临界值的时间，结束时间到临界值的时间。单位为秒
-                diff_time1 = (clocks[begin_time_zone] - begin_time.hour - 1) * 3600 + \
+                diff_time1 = (clocks[begin_time_zone] - (begin_time.hour if begin_time.hour >= 7 else (begin_time.hour + 24)) - 1) * 3600 + \
                              (60 - begin_time.minute) * \
                     60 + 60 - begin_time.second
                 diff_time2 = (
-                    end_time.hour - clocks[end_time_zone - 1]) * 3600 + end_time.minute * 60 + end_time.second
+                    (end_time.hour if begin_time.hour >= 7 else (begin_time.hour + 24)) - clocks[(end_time_zone - 1) % len(clocks)]) * 3600 + end_time.minute * 60 + end_time.second
                 zones = []  # 要计算的时间区域。①如果开始区域为2，结束为5，得到2、3、4、5；②如果开始为5，结束为2，得到5、6、1、2
-                begin_time_zone = begin_time_zone % len(clocks)
-                end_time_zone = end_time_zone % len(clocks)
                 if begin_time_zone < end_time_zone:
                     for i in range(begin_time_zone, end_time_zone + 1):
                         zones.append(i)
@@ -571,7 +571,7 @@ async def query_report(request):
         for charger in charger_list:
             pass_seconds_from_start = timer.get_cur_timestamp() - charger.start_time
             charger_fee = session.query(ChargeRecord.id, func.sum(ChargeRecord.charging_cost).label("t_charging_cost"), func.sum(ChargeRecord.service_cost).label(
-                "t_service_cost"), func.sum(ChargeRecord.total_cost).label("t_total_cost")).filter(ChargeRecord.id == charger.id).first()
+                "t_service_cost"), func.sum(ChargeRecord.total_cost).label("t_total_cost")).filter(ChargeRecord.pile_id == charger.id).first()
             report_list.append({
                 "day": math.ceil(pass_seconds_from_start / 86400),
                 "week": math.ceil(pass_seconds_from_start / 604800),
@@ -580,9 +580,9 @@ async def query_report(request):
                 "cumulative_usage_times": charger.cumulative_usage_times,
                 "cumulative_charging_time": charger.cumulative_charging_time,
                 "cumulative_charging_amount": charger.cumulative_charging_amount,
-                "cumulative_charging_earning": charger_fee.t_charging_cost,
-                "cumulative_service_earning": charger_fee.t_service_cost,
-                "cumulative_earning": charger_fee.t_total_cost
+                "cumulative_charging_earning": charger_fee.t_charging_cost if charger_fee.t_charging_cost is not None else 0,
+                "cumulative_service_earning": charger_fee.t_service_cost if charger_fee.t_service_cost is not None else 0,
+                "cumulative_earning": charger_fee.t_total_cost if charger_fee.t_total_cost is not None else 0
             })
 
     if success:
