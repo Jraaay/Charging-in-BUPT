@@ -16,15 +16,16 @@ def singleton(cls):
 class Timer(object):
     start_time = 0
     speed = 60
+    shift = 0
 
     def __init__(self):
         self.start_time = datetime.datetime.now()
 
     def get_cur_timestamp(self):
-        return int((datetime.datetime.now().timestamp() - self.start_time.timestamp()) * self.speed + self.start_time.timestamp())
+        return int((datetime.datetime.now().timestamp() - self.start_time.timestamp()) * self.speed + self.start_time.timestamp() + self.shift)
 
     def get_cur_format_time(self):
-        return datetime.datetime.fromtimestamp(int((datetime.datetime.now().timestamp() - self.start_time.timestamp()) * self.speed + self.start_time.timestamp())).strftime('%Y-%m-%d %H:%M:%S')
+        return datetime.datetime.fromtimestamp(int((datetime.datetime.now().timestamp() - self.start_time.timestamp()) * self.speed + self.start_time.timestamp() + self.shift)).strftime('%Y-%m-%d %H:%M:%S')
 
 
 if __name__ == '__main__':

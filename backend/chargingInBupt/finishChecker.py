@@ -20,7 +20,7 @@ async def check_finish():
                 await end_charging_request(session.query(User).filter(
                     User.id == charge_request.user_id).first())
                 print("finish checker: end charging request " +
-                    str(charge_request.id))
+                      str(charge_request.id))
 
 
 async def end_charging_request(user):
@@ -73,45 +73,50 @@ async def end_charging_request(user):
             # 18：00 - 21：00  4  峰时  1.0元/度
             # 21：00 - 23：00  5  平时  0.7元/度
             # 23：00 - 07：00  6  谷时  0.4元/度
-            clocks = [7, 10, 15, 18, 21, 23, 7]
+            clocks = [7, 10, 15, 18, 21, 23, 31]
             fees = [0.7, 1.0, 0.7, 1.0, 0.7, 0.4]
             # 判断开始时间和结束时间的 时间区域
-            for i in range(len(clocks)):
-                if clocks[i] <= begin_time.hour < clocks[(i + 1) % len(clocks)] or i == 5:
+            for i in range(len(clocks) + 1):
+                if i == 6 or clocks[i] <= begin_time.hour < clocks[(i + 1) % len(clocks)]:
                     begin_time_zone = i + 1
-                if clocks[i] <= end_time.hour < clocks[(i + 1) % len(clocks)] or i == 5:
+                    break
+            for i in range(len(clocks)):
+                if i == 6 or clocks[i] <= end_time.hour < clocks[(i + 1) % len(clocks)]:
                     end_time_zone = i + 1
+                    break
             # 如果开始和结束的时间区域相同
             if begin_time_zone == end_time_zone:
                 charging_cost = float('%.2f' % (
                     charged_amount * fees[begin_time_zone - 1]))  # 充电费用
             else:
                 # 分别计算开始时间到临界值的时间，结束时间到临界值的时间。单位为秒
-                diff_time1 = (clocks[begin_time_zone + 1] - begin_time.hour - 1) * 3600 + \
+                diff_time1 = (clocks[begin_time_zone] - begin_time.hour - 1) * 3600 + \
                              (60 - begin_time.minute) * \
                     60 + 60 - begin_time.second
                 diff_time2 = (
-                    end_time.hour - clocks[end_time_zone]) * 3600 + end_time.minute * 60 + end_time.second
+                    end_time.hour - clocks[end_time_zone - 1]) * 3600 + end_time.minute * 60 + end_time.second
                 zones = []  # 要计算的时间区域。①如果开始区域为2，结束为5，得到2、3、4、5；②如果开始为5，结束为2，得到5、6、1、2
+                begin_time_zone = begin_time_zone % len(clocks)
+                end_time_zone = end_time_zone % len(clocks)
                 if begin_time_zone < end_time_zone:
-                    for i in range(begin_time_zone, end_time_zone+1):
+                    for i in range(begin_time_zone, end_time_zone + 1):
                         zones.append(i)
                 else:
                     for i in range(begin_time_zone, 7):
                         zones.append(i)
-                    for i in range(1, end_time_zone):
+                    for i in range(1, end_time_zone + 1):
                         zones.append(i)
                 # 对覆盖的所有时间区域进行计算
                 for i in zones:
                     if i == begin_time_zone:
                         charging_cost = diff_time1 / 3600 * \
-                            rate * fees[begin_time_zone - 1]
+                            rate * fees[i - 1]
                     elif i == end_time_zone:
                         charging_cost += diff_time2 / 3600 * \
-                            rate * fees[begin_time_zone - 1]
+                            rate * fees[i - 1]
                     else:
-                        charging_cost += (clocks[i + 1] - clocks[i]) * \
-                            rate * fees[begin_time_zone - 1]
+                        charging_cost += (clocks[i] - clocks[i - 1]) * \
+                            rate * fees[i - 1]
 
             charging_cost = float('%.2f' % charging_cost)  # 充电费用
             total_cost = service_cost + charging_cost  # 总费用
