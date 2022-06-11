@@ -14,7 +14,44 @@ from chargingInBupt.config import CONFIG
 from chargingInBupt.schedule import schedule
 from sqlalchemy import and_, func
 
-app = Sanic("Charging_in_BUPT")
+from sanic.log import *
+import logging
+from sanic import response
+from sanic.exceptions import *
+# 指定日志的文件名字，记录的日志记录在那个文件中
+logging.basicConfig(filename="access.log", format='%(asctime)s %(filename)s %(levelname)s %(message)s',)
+
+app = Sanic("Charging_in_BUPT", configure_logging=LOGGING_CONFIG_DEFAULTS)
+
+@app.exception(SanicException)
+async def err404(request, exception):
+    error_logger.warning("SanicException: {0} {1}".format(request.url,exception))
+    return response.json({"code": -1, "messages": exception.args[0]})
+
+
+@app.exception(ServerError)
+async def ignore_sanic_5001(request, exception):
+    error_logger.warning()
+    return response.json({"code": -1, "messages": exception.args[0]})
+
+@app.middleware("request")
+async def log_uri(request):
+    # Simple middleware to log the URI endpoint that was called
+    logger.info("URI called: {0}".format(request.url))
+
+@app.middleware("request")
+async def log_request(request):
+    # Simple middleware to log the request
+    logger.info("Request: {0}".format(request.json))
+
+@app.middleware("response")
+async def log_response(request, response):
+    # Simple middleware to log the response
+    logger.info("Response: {0}".format(response.body))
+
+
+
+
 
 
 @app.post('/api/login')
