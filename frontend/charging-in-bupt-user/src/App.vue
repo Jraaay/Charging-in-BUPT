@@ -470,7 +470,7 @@ export default {
         },
       },
     ];
-    const operations = [0, 1, 2, 4].map((i) => allOpt[i]);
+    const operations = [0, 4].map((i) => allOpt[i]);
     return {
       timeConfig: {
         startTime: null,
