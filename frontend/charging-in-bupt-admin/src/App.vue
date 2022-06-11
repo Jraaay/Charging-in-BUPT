@@ -265,14 +265,14 @@
       <div style="margin-bottom: 30px; text-align-last: center">
         <el-select
           v-model="selectedReportId"
-          placeholder="选择日期和充电桩"
+          placeholder="选择充电桩"
           @change="handleReportChange"
         >
           <el-option
             v-for="item in reportsRaw"
-            :key="'Day ' + item.day + ' Pile ' + item.pile_id"
-            :label="'Day ' + item.day + ' Pile ' + item.pile_id"
-            :value="'Day ' + item.day + ' Pile ' + item.pile_id"
+            :key="'Pile ' + item.pile_id"
+            :label="'Pile ' + item.pile_id"
+            :value="'Pile ' + item.pile_id"
           />
         </el-select>
       </div>
@@ -560,7 +560,7 @@ export default {
     },
     handleReportChange() {
       this.selectedReport = this.reportsRaw.find(
-        (item) => (item.day == this.selectedReportId.split(' ')[1] && item.pile_id == this.selectedReportId.split(' ')[3])
+        (item) => item.pile_id == this.selectedReportId.split(' ')[1]
       );
       console.log(this.reportsRaw);
       console.log(this.selectedReport);
