@@ -1,6 +1,7 @@
 from chargingInBupt.port import app
 from chargingInBupt.Timer import Timer
 from chargingInBupt.orm import Charger, session
+from chargingInBupt.finishChecker import check_finish
 
 if __name__ == "__main__":
     timer = Timer()
@@ -11,4 +12,5 @@ if __name__ == "__main__":
         charger.cumulative_charging_amount = "0"
         charger.start_time = timer.get_cur_timestamp()
     session.commit()
-    app.run()
+    app.add_task(check_finish)
+    app.run(debug=False)

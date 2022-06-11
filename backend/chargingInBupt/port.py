@@ -19,13 +19,16 @@ import logging
 from sanic import response
 from sanic.exceptions import *
 # 指定日志的文件名字，记录的日志记录在那个文件中
-logging.basicConfig(filename="access.log", format='%(asctime)s %(filename)s %(levelname)s %(message)s',)
+logging.basicConfig(filename="access.log",
+                    format='%(asctime)s %(filename)s %(levelname)s %(message)s',)
 
 app = Sanic("Charging_in_BUPT", configure_logging=LOGGING_CONFIG_DEFAULTS)
 
+
 @app.exception(SanicException)
 async def err404(request, exception):
-    error_logger.warning("SanicException: {0} {1}".format(request.url,exception))
+    error_logger.warning(
+        "SanicException: {0} {1}".format(request.url, exception))
     return response.json({"code": -1, "messages": exception.args[0]})
 
 
@@ -34,24 +37,23 @@ async def ignore_sanic_5001(request, exception):
     error_logger.warning()
     return response.json({"code": -1, "messages": exception.args[0]})
 
+
 @app.middleware("request")
 async def log_uri(request):
     # Simple middleware to log the URI endpoint that was called
     logger.info("URI called: {0}".format(request.url))
+
 
 @app.middleware("request")
 async def log_request(request):
     # Simple middleware to log the request
     logger.info("Request: {0}".format(request.json))
 
+
 @app.middleware("response")
 async def log_response(request, response):
     # Simple middleware to log the response
     logger.info("Response: {0}".format(response.body))
-
-
-
-
 
 
 @app.post('/api/login')
@@ -267,9 +269,12 @@ async def edit_charging_request(request):
 
 @app.get('/api/user/end_charging_request')
 @authorized()
-async def end_charging_request(request):
-    user = session.query(User).filter(
-        User.username == get_username(request)).first()
+async def end_charging_request(request = None, _user = None):
+    if _user is None:
+        user = session.query(User).filter(
+            User.username == get_username(request)).first()
+    else:
+        user = _user
     # TODO(2): 处理，取消充电请求
     # question：用户的最后一个请求一定是最新的要取消的请求吗？
     request = session.query(ChargeRequest).filter(
@@ -409,17 +414,17 @@ async def end_charging_request(request):
             ChargeWaitArea.request_id == request.id).delete()
 
         session.commit()
-
-    if success:
-        return json({
-            "code": 0,
-            "message": "Success"
-        })
-    else:
-        return json({
-            "code": -1,
-            "message": error_msg
-        })
+    if _user is None:
+        if success:
+            return json({
+                "code": 0,
+                "message": "Success"
+            })
+        else:
+            return json({
+                "code": -1,
+                "message": error_msg
+            })
 
 
 @app.get('/api/user/query_order_detail')
@@ -614,7 +619,8 @@ async def query_all_piles_stat(request):
 async def query_queue(request):
     # TODO(3): 处理，获取目前所有正在排队的用户
     # 读取数据库
-    user_in_queue = session.query(ChargeRequest).filter(ChargeRequest.state != 0).join(User, ChargeRequest.user_id == User.id).all()
+    user_in_queue = session.query(ChargeRequest).filter(
+        ChargeRequest.state != 0).join(User, ChargeRequest.user_id == User.id).all()
     timer = Timer()
 
     success = None
