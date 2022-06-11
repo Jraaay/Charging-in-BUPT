@@ -172,12 +172,14 @@
           <el-input-number
             v-model="reqChargeForm.require_amount"
             :min="1"
+            :precision="2"
           />（单位：Wh）
         </el-form-item>
         <el-form-item label="电池容量">
           <el-input-number
             v-model="reqChargeForm.battery_size"
             :min="1"
+            :precision="2"
           />（单位：Wh）
         </el-form-item>
       </el-form>
@@ -617,6 +619,7 @@ export default {
               });
           } else {
             ElMessage.error(res.data.message);
+            loading.close();
           }
         });
     },
@@ -663,8 +666,8 @@ export default {
           "/api/user/submit_charging_request",
           {
             charge_mode: this.reqChargeForm.charge_mode == "快充" ? "F" : "T",
-            require_amount: this.reqChargeForm.require_amount.toString(),
-            battery_size: this.reqChargeForm.battery_size.toString(),
+            require_amount: this.reqChargeForm.require_amount.toFixed(2).toString(),
+            battery_size: this.reqChargeForm.battery_size.toFixed(2).toString(),
           },
           {
             headers: {
