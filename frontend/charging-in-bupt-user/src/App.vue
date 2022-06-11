@@ -40,8 +40,9 @@
           ></path>
         </svg>
         <div class="title">巴普特充电系统</div>
-        <div class="user-icon" v-if="token != ''">
+        <div class="user-icon">
           <svg
+            v-if="token != ''"
             t="1653485792064"
             class="icon"
             viewBox="0 0 1024 1024"
@@ -670,7 +671,9 @@ export default {
           "/api/user/submit_charging_request",
           {
             charge_mode: this.reqChargeForm.charge_mode == "快充" ? "F" : "T",
-            require_amount: this.reqChargeForm.require_amount.toFixed(2).toString(),
+            require_amount: this.reqChargeForm.require_amount
+              .toFixed(2)
+              .toString(),
             battery_size: this.reqChargeForm.battery_size.toFixed(2).toString(),
           },
           {
@@ -909,6 +912,7 @@ export default {
 .user-icon {
   padding-top: 20px;
   text-align: right;
+  width: 20px;
 }
 .loginForm {
   max-width: 400px;
