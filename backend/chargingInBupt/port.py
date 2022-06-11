@@ -24,6 +24,18 @@ logging.basicConfig(filename="access.log",
 
 app = Sanic("Charging_in_BUPT", configure_logging=LOGGING_CONFIG_DEFAULTS)
 
+@app.middleware('request')
+async def print_on_request(request):
+    if request.method == 'OPTIONS':
+        return response.json(None)  
+ 
+@app.middleware('response')
+async def prevent_xss(request, response):
+    if 'X-Error-Code' not in dict(response.headers):
+        response.headers['X-Error-Code'] = 0
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "X-Custom-Header,content-type"
+
 
 @app.exception(SanicException)
 async def err404(request, exception):
