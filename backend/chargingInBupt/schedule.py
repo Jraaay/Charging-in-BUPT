@@ -155,10 +155,6 @@ def schedule(schedule_type, request_id, type=None, err_charger_id=None, must_sch
         # 返回充电完成最快的充电桩编号
         pile_id = their_pile_id[endtime_list.index(min(endtime_list))]
 
-        # 写数据库
-        session.query(ChargeRequest).filter(ChargeRequest.id == request_id).update({
-            "charge_pile_id": pile_id
-        })
         now_queue_len = session.query(ChargeArea.request_id).filter(
             ChargeArea.pile_id == pile_id).count()
         session.query(Charger).filter(Charger.id == pile_id).update({
@@ -194,6 +190,10 @@ def schedule(schedule_type, request_id, type=None, err_charger_id=None, must_sch
             session.query(ChargeRequest).filter(ChargeRequest.id == request_id).update({
                 "state": 2 if not error else 5  # 充电区等待
             })
+        # 写数据库
+        session.query(ChargeRequest).filter(ChargeRequest.id == request_id).update({
+            "charge_pile_id": pile_id
+        })
 
         session.commit()
 
