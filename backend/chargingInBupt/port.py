@@ -157,10 +157,10 @@ async def submit_charging_request(request):
 
             if charge_mode == "F":
                 charge_time = Decimal(require_amount) / \
-                    CONFIG['cfg']['F_power'] * 60
+                    CONFIG['cfg']['F_power'] * 3600
             elif charge_mode == "T":
                 charge_time = Decimal(require_amount) / \
-                    CONFIG['cfg']['T_power'] * 60
+                    CONFIG['cfg']['T_power'] * 3600
             # 生成充电请求，插入数据库
             timer = Timer()
             submit_time = timer.get_cur_timestamp()
