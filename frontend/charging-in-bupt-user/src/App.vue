@@ -1,23 +1,4 @@
 <template>
-  <div class="floatButton" v-if="token != ''">
-    <el-popover placement="bottom" :width="250" trigger="click" class="gm">
-      <template #reference>
-        <el-icon :size="25" color="white"><Setting /></el-icon>
-      </template>
-      <el-form>
-        <el-form-item label="当前状态">
-          <el-radio-group v-model="curStateId" size="small">
-            <el-radio-button label="0" />
-            <el-radio-button label="1" />
-            <el-radio-button label="2" />
-            <el-radio-button label="3" />
-            <el-radio-button label="4" />
-            <el-radio-button label="5" />
-          </el-radio-group>
-        </el-form-item>
-      </el-form>
-    </el-popover>
-  </div>
   <el-container>
     <el-header>
       <el-row style="display: flex; justify-content: space-between">
@@ -40,26 +21,34 @@
           ></path>
         </svg>
         <div class="title">巴普特充电系统</div>
-        <div class="user-icon">
-          <svg
+        <div>
+          <el-col
+            style="line-height: 60px; padding-right: 5px; margin-left: -30px"
             v-if="token != ''"
-            t="1653485792064"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="3294"
-            width="20"
-            height="20"
-            @click="logout"
-            style="cursor: pointer"
           >
-            <path
-              d="M1024 512l-100.937143 103.424-0.731428-0.768L768 770.596571l-103.497143-103.460571L746.422857 585.142857H329.142857v-146.285714h417.28l-81.92-82.029714L768 253.403429l154.331429 155.940571 0.731428-0.804571zM109.714286 182.857143v658.285714a73.142857 73.142857 0 0 0 73.142857 73.142857h365.714286v109.714286H146.285714a146.285714 146.285714 0 0 1-146.285714-146.285714V146.285714a146.285714 146.285714 0 0 1 146.285714-146.285714h402.285715v109.714286H182.857143a73.142857 73.142857 0 0 0-73.142857 73.142857z"
-              p-id="3295"
-              fill="#ffffff"
-            ></path>
-          </svg>
+            {{ getUsername() }}
+          </el-col>
+          <el-col class="user-icon">
+            <svg
+              v-if="token != ''"
+              t="1653485792064"
+              class="icon"
+              viewBox="0 0 1024 1024"
+              version="1.1"
+              xmlns="http://www.w3.org/2000/svg"
+              p-id="3294"
+              width="20"
+              height="20"
+              @click="logout"
+              style="cursor: pointer"
+            >
+              <path
+                d="M1024 512l-100.937143 103.424-0.731428-0.768L768 770.596571l-103.497143-103.460571L746.422857 585.142857H329.142857v-146.285714h417.28l-81.92-82.029714L768 253.403429l154.331429 155.940571 0.731428-0.804571zM109.714286 182.857143v658.285714a73.142857 73.142857 0 0 0 73.142857 73.142857h365.714286v109.714286H146.285714a146.285714 146.285714 0 0 1-146.285714-146.285714V146.285714a146.285714 146.285714 0 0 1 146.285714-146.285714h402.285715v109.714286H182.857143a73.142857 73.142857 0 0 0-73.142857 73.142857z"
+                p-id="3295"
+                fill="#ffffff"
+              ></path>
+            </svg>
+          </el-col>
         </div>
       </el-row>
     </el-header>
@@ -801,7 +790,6 @@ export default {
         .then((res) => {
           if (res.data.code === 0) {
             this.curTime = res.data.data.datetime;
-            console.log(this);
             if (res.data.data.speed != null) {
               this.timeConfig.timeSpeed = res.data.data.speed;
               this.timeConfig.startTime = res.data.data.timestamp;
@@ -810,11 +798,6 @@ export default {
               this.timer2 = setInterval(() => {
                 const dur =
                   new Date().getTime() / 1000 - this.timeConfig.startRealTime;
-                console.log(
-                  new Date().getTime() / 1000,
-                  this.timeConfig.startRealTime,
-                  dur
-                );
                 const curTime =
                   this.timeConfig.timeSpeed * dur + this.timeConfig.startTime;
                 this.curTime = new Date(curTime * 1000).toLocaleString();
@@ -828,10 +811,12 @@ export default {
           ElMessage.error(err);
         });
     },
+    getUsername() {
+      return JSON.parse(window.atob(this.token.split('.')[1])).username
+    },
   },
   watch: {
     curStateId(val, old) {
-      console.log(old, val);
       if (old != 0 && val != 0) {
         ElMessageBox.alert("状态已更新，请注意您需要做的动作", "状态更新提醒", {
           confirmButtonText: "好的",

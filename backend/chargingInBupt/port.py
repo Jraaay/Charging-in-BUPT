@@ -255,6 +255,8 @@ async def edit_charging_request(request):
                 "charge_id": charge_id,
                 "type": charge_mode
             })
+
+            schedule(2, record.id)
         # 修改后数据写入数据库
         session.query(ChargeRequest).filter(ChargeRequest.id == record.id).update({
             "charge_mode": charge_mode,

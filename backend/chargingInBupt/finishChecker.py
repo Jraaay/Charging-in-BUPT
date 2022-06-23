@@ -11,19 +11,19 @@ from chargingInBupt.port import app
 
 async def check_finish():
     while True:
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(1)
         to_check = session.query(ChargeRequest).filter(
             ChargeRequest.state == 3).all()
         timer = Timer()
         for charge_request in to_check:
             if charge_request.start_time + charge_request.charge_time <= timer.get_cur_timestamp():
                 await end_charging_request(session.query(User).filter(
-                    User.id == charge_request.user_id).first())
+                    User.id == charge_request.user_id).first(), charge_request.start_time + charge_request.charge_time)
                 print("finish checker: end charging request " +
                       str(charge_request.id))
 
 
-async def end_charging_request(user):
+async def end_charging_request(user, end_time):
     # TODO(2): 处理，取消充电请求
     # question：用户的最后一个请求一定是最新的要取消的请求吗？
     request = session.query(ChargeRequest).filter(
@@ -36,8 +36,8 @@ async def end_charging_request(user):
         # 生成详单前面部分
         timer = Timer()
         create_time = timer.get_cur_format_time()  # 用内置的timer类获取格式化模拟时间字符串
-        now = datetime.datetime.strptime(
-            create_time, "%Y-%m-%d %H:%M:%S")  # 把格式化字符串转换为datetime类以进行计算
+        now = datetime.datetime.fromtimestamp(end_time)
+
         # "order_id": "20220101000001",
         order_id = now.strftime("%Y%m%d") + '%06d' % request.id
         record_id = str(session.query(ChargeRecord).count() + 1)
